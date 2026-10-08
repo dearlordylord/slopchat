@@ -12,13 +12,21 @@
         (pcase (plist-get request :action)
           ("send"
            (unless (stringp (plist-get request :text)) (error "text must be a string"))
-           (slopchat-submit
-            chat (plist-get request :text)
-            (lambda (reply error)
-              (slopchat-cli--reply
-               process (cond ((eq error 'steered) '(:status "steered"))
-                             (error `(:status "error" :message ,error))
-                             (t `(:status "reply" :text ,reply)))))))
+           (let ((ack (plist-get request :ack)) (ready nil) (completion nil))
+             (let* ((deliver (lambda (reply error)
+                              (slopchat-cli--reply process
+                               (cond ((eq error 'steered) '(:status "steered"))
+                                     (error `(:status "error" :message ,error))
+                                     (t `(:status "reply" :text ,reply))))))
+                    (_accepted-id (slopchat-submit chat (plist-get request :text)
+                         (lambda (reply error)
+                           (if ready (funcall deliver reply error)
+                             (setq completion (list reply error))))
+                         (when ack (lambda (id)
+                           (slopchat-cli--reply process `(:status "accepted" :value ,id)))))))
+
+               (setq ready t)
+               (when completion (apply deliver completion)))))
           ("note"
            (unless (stringp (plist-get request :text)) (error "text must be a string"))
            (let ((ids (slopchat-log chat "note" (plist-get request :text))))

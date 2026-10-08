@@ -248,7 +248,7 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
        (if (slopchat-input-callback input)
            (funcall (slopchat-input-callback input) nil (error-message-string err))
          (signal (car err) (cdr err)))))))
-(defun slopchat-submit (chat text &optional callback)
+(defun slopchat-submit (chat text &optional callback on-accepted)
   "Log input once; steer a live turn or queue a fresh turn. Return its first ID.
 CALLBACK receives (REPLY ERROR) when a newly started user turn completes."
   (let* ((first (slopchat-chat-count chat))
@@ -257,6 +257,8 @@ CALLBACK receives (REPLY ERROR) when a newly started user turn completes."
     ;; Rendering for queued input is restricted to IDs before FIRST, even if its
     ;; own leaf is already built by the time its fresh turn starts.
     (slopchat-log chat "user" text)
+    ;; Acceptance follows durable input logging, before any model work.
+    (when on-accepted (funcall on-accepted first))
     (let ((run (slopchat-chat-run chat)))
       (if (and (slopchat-run-p run) (slopchat-run-turn run) (not (slopchat-run-done run)))
           (condition-case _err

@@ -6,18 +6,18 @@ From the repository root, install with `bun install --cwd ui`, then run `./scrip
 
 ## Controls
 
-Enter sends the composer message; Ctrl+Enter inserts a newline. Ctrl+J is the newline fallback for terminals that cannot distinguish Ctrl+Enter from Enter (use Ctrl+J there). Ctrl+G remains the safe send fallback (avoiding Ctrl+S/XOFF). Sending a different message while the agent works steers the existing turn. Tab switches to memory; arrows select; Enter zooms; D reads the date. Ctrl+P loads older history; Ctrl+Q closes only the UI. Mouse wheel scrolls. Failed sends retain the draft; uncertain outcomes are never automatically retried.
+Enter sends the composer message; Ctrl+Enter inserts a newline. Ctrl+J is the newline fallback for terminals that cannot distinguish Ctrl+Enter from Enter (use Ctrl+J there). Ctrl+G remains the safe send fallback (avoiding Ctrl+S/XOFF). Sending a different message while the agent works steers the existing turn. Tab switches to memory; arrows select; Enter zooms; D reads the date. Ctrl+P loads older history; Ctrl+Q closes only the UI. Mouse wheel scrolls. The submitted draft clears on acceptance, not on the final model reply; text typed meanwhile is preserved. The composer starts at one logical line, grows and shrinks with explicit newlines up to six lines. Failed sends retain the draft; uncertain outcomes are never automatically retried.
 
 ## Bounds and measurements
 
-Lisp owns the agent, journal and memory tree. The client polls history/status every 500 ms, rather than streaming tokens. History is capped at 200 messages with 4,000 displayed characters each; memory shows the first 40 nodes; the chart retains 52 context-byte samples. Context bytes are not token counts, cost or terminal FPS. Older pages displace newer messages within the bounded window; new activity moves toward latest history. Requests time out after five seconds; UI shutdown cancels its tracked polling/send/inspection work.
+Lisp owns the agent, journal and memory tree. The client polls history/status every 500 ms, rather than streaming tokens. History is capped at 200 messages with 4,000 displayed characters each; memory shows the first 40 nodes; the chart retains 52 context-byte samples. Context bytes are not token counts, cost or terminal FPS. Older pages displace newer messages within the bounded window; new activity moves toward latest history. Read and acceptance requests time out after five seconds; this is not a model-reply timeout. The UI requests an early accepted acknowledgement immediately after durable input logging, before steering or pump/model work, and receives the eventual reply through history polling; UI shutdown cancels its tracked polling/send/inspection work.
 
 ## Validation
 
-Shortcut checks passed: composer Enter sends without adding a newline; Ctrl+Enter and Ctrl+J insert a newline without sending; Ctrl+G sends; memory Enter zooms. Typecheck, all five Bun tests, and headless smoke at 60x24 and 120x40 completed with exit 0.
+Shortcut checks passed: composer Enter sends without adding a newline; Ctrl+Enter and Ctrl+J insert a newline without sending; Ctrl+G sends; memory Enter zooms. Typecheck, all six Bun tests, and headless smoke at 60x24 and 120x40 completed with exit 0.
 
 
-Final Bun typecheck and tests: exit 0, 5 tests passed (15 assertions): cancellation, older paging, fragmented Unicode JSONL/disconnect, and deterministic send/steer preserving the original reply. Success transport tests use scratch sockets, not the live chat.
+Final Bun typecheck and tests: exit 0, 6 tests passed (25 assertions), including deferred acceptance and composer resizing: cancellation, older paging, fragmented Unicode JSONL/disconnect, and deterministic send/steer preserving the original reply. Success transport tests use scratch sockets, not the live chat.
 
 Headless App checks previously passed at 60x24 and 120x40: Russian bracketed paste, failed-send draft retention, memory navigation, 200-message history and 52-point chart updates. Readable snapshots and bounded timing reports are in `artifacts/`; median render updates were about 22 ms, maximum about 39 ms. These are not emulator FPS or long-run memory-stability measurements.
 

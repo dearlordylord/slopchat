@@ -3,6 +3,10 @@ SLOPCHAT - tick 24 - messages 0 - summaries 0
 │text long text long text long text long text long text    │
 │long text long text long text long text long text long    │
 │text long text long text long text long text long text    │
+│long text long text long text long text long text long    │
+│text long text long text long text long text long text    │
+│long text long text long text long text long text long    │
+│text long text long text long text long text long text    │
 │long text long text long text                            ▄│
 └──────────────────────────────────────────────────────────┘
 ┌─────────────────┐Context bytes: peak 7500 (relative chart)
@@ -17,8 +21,4 @@ Failed; draft retained. Outcome may be unknown:
 TransportError: connect ENOENT /tmp/absent-ui-test.sock     
                                                             
 Привет                                                      
-                                                            
-                                                            
-                                                            
-                                                            
 Enter send - Ctrl+Enter/Ctrl+J newline - Ctrl+G send - Tab  
