@@ -1,0 +1,24 @@
+                                                                                
+ SLOPCHAT LAB · OpenTUI React + Effect 4 Atom · ARTIFICIAL DATA                 
+                                                                                
+ STRESS · 6 PANELS  |  RUNNING  |  tick 0  |  sample 38/100                     
+                                                                                
+ ┌─Graph 1───────────────┐ ┌─Graph 2───────────────┐ ┌─Graph 3───────────────┐  
+ │                       │ │     ●│         ●●│    │ │ ●│●●●●│       ●│ ●│   │  
+ │●●●●●●●│       ●●●●│   │ │●●●●●│●●│     ●●│ ●●●●●│ │●│●│   ●│ ●●●●●││ │●●●●│  
+ │       ●●●●●●●●│   ●●●●│ │        ●●●●●●│        │ │        ●●│     │ │    │  
+ │                       │ │                       │ │                ●●│    │  
+ └───────────────────────┘ └───────────────────────┘ └───────────────────────┘  
+                                                                                
+ ┌─Log 1 · 200 lines─────┐ ┌─Log 2 · 200 lines─────┐ ┌─Log 3 · 200 lines─────┐  
+ │[000] tick=0 panel=0  ▀│ │[000] tick=0 panel=1  ▀│ │[000] tick=0 panel=2  ▀│  
+ │synthetic event payloa │ │synthetic event payloa │ │synthetic event payloa │  
+ │bounded text bounded   │ │bounded text bounded   │ │bounded text bounded   │  
+ │text bounded text      │ │text bounded text      │ │text bounded text      │  
+ └───────────────────────┘ └───────────────────────┘ └───────────────────────┘  
+                                                                                
+ Space/P pause · S stress · R reset · Tab metrics/memory · ←/→ select · Q quit  
+                                                                                
+ Local experiment only · no model calls · no Lisp server · no persistence       
+                                                                                
+                                                                                

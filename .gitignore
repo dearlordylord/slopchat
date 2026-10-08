@@ -1,0 +1,4 @@
+.references/
+.chats/
+*.elc
+__pycache__/

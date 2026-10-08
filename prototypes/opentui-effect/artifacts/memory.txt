@@ -1,0 +1,34 @@
+                                                                                                              
+ SLOPCHAT LAB · OpenTUI React + Effect 4 Atom · ARTIFICIAL DATA                                               
+                                                                                                              
+ MEMORY  |  RUNNING  |  tick 1  |  sample 32/100                                                              
+                                                                                                              
+ ┌─Synthetic memory topology · select leaf with ← →─────────────────────────────────────────────────────────┐ 
+ │                                                                                                          │ 
+ │                    [summary 0–3]                                                                         │ 
+ │                     ┌────┴────┐                                                                          │ 
+ │                 [0–1]       [2–3]                                                                        │ 
+ │                 ┌─┴─┐       ┌─┴─┐                                                                        │ 
+ │                 0   1       2   3                                                                        │ 
+ │ Selected leaf: 1 · agent reply                                                                           │ 
+ │ This diagram is textual. The metrics chart above uses a native framebuffer.                              │ 
+ │                                                                                                          │ 
+ │                                                                                                          │ 
+ │                                                                                                          │ 
+ │                                                                                                          │ 
+ │                                                                                                          │ 
+ │                                                                                                          │ 
+ │                                                                                                          │ 
+ │                                                                                                          │ 
+ └──────────────────────────────────────────────────────────────────────────────────────────────────────────┘ 
+                                                                                                              
+ Space/P pause · S stress · R reset · Tab metrics/memory · ←/→ select · Q quit                                
+                                                                                                              
+ Local experiment only · no model calls · no Lisp server · no persistence                                     
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              

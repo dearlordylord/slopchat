@@ -1,0 +1,14 @@
+{
+  "kind": "drained PTY functional/throughput probe; excludes terminal emulator paint",
+  "size": "120x40",
+  "startupUntilTitleMs": 645.47,
+  "stressSwitchUntilLabelMs": 39.44,
+  "observationSeconds": 5.006,
+  "ansiBytes": 61822,
+  "ansiBytesPerSecond": 12349,
+  "completedSynchronizedFrames": 20,
+  "pauseAcknowledgementMs": 9.75,
+  "exitCode": 0,
+  "terminalRestored": true,
+  "liveSimulationHz": 4
+}

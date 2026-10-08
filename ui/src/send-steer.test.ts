@@ -1,0 +1,5 @@
+import {test,expect} from 'bun:test'
+import {createServer} from 'node:net'
+import {Effect} from 'effect'
+import {request} from './transport'
+test('send steer preserves original reply',async()=>{const path='/tmp/slopchat-deterministic-'+process.pid+'.sock';let original:import('node:net').Socket|undefined;let notify!:()=>void;const ready=new Promise<void>(r=>notify=r);const server=createServer(c=>c.once('data',raw=>{const p=JSON.parse(raw.toString());if(p.text==='first'){original=c;notify()}else{c.end(JSON.stringify({status:'steered'})+'\n');original?.end(JSON.stringify({status:'reply',text:'original reply'})+'\n')}}));await new Promise<void>(r=>server.listen(path,r));try{const first=Effect.runPromise(request(path,{action:'send',text:'first'},true));await ready;expect(await Effect.runPromise(request(path,{action:'send',text:'correction'},true))).toEqual({status:'steered'});expect(await first).toEqual({status:'reply',text:'original reply'})}finally{await new Promise<void>(r=>server.close(()=>r()))}})

@@ -1,0 +1,1 @@
+PASS: headless React + Atom render; framebuffer chart; pause/resume; state advance; Tab; node selection; reset; resize; stress panels/input; real Effect Schedule/Stream emission; disposal.

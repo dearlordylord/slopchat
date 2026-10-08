@@ -1,0 +1,40 @@
+                                                                                                                        
+ SLOPCHAT LAB · OpenTUI React + Effect 4 Atom · ARTIFICIAL DATA                                                         
+                                                                                                                        
+ STRESS · 6 PANELS  |  RUNNING  |  tick 0  |  sample 38/100                                                             
+                                                                                                                        
+ ┌─Graph 1────────────────────────────┐ ┌─Graph 2────────────────────────────┐ ┌─Graph 3────────────────────────────┐   
+ │                                    │ │                                    │ │                                    │   
+ │100 ································│ │100 ································│ │100 ·······●●│···········●│●│·······│   
+ │                                    │ │          ●●●│           ●●●│       │ │     ●●●●●●│ │          ●│││●│      │   
+ │          ●●●│           ●●●│       │ │     ●●●●●│  ●│         ●│  ●│      │ │             ●●│       ●│ ││ ●●●●│  │   
+ │     ●●●●●│  ●│         ●│  ●│      │ │              ●│       ●│    ●●●●●  │ │               ●│ ●●●●●│  ││     ●  │   
+ │ 50 ··········●│·······●│····●●●●●··│ │ 50 ···········●│·●●●●●│············│ │ 50 ············●●│·······││········│   
+ │               ●│●●●●●●│            │ │                ●●│                 │ │                          ││        │   
+ │                ●│                  │ │                                    │ │                          ││        │   
+ │  0 ································│ │  0 ································│ │  0 ······················●│········│   
+ │                                    │ │                                    │ │                                    │   
+ │     samples →                      │ │     samples →                      │ │     samples →                      │   
+ │                                    │ │                                    │ │                                    │   
+ └────────────────────────────────────┘ └────────────────────────────────────┘ └────────────────────────────────────┘   
+                                                                                                                        
+ ┌─Log 1 · 200 lines──────────────────┐ ┌─Log 2 · 200 lines──────────────────┐ ┌─Log 3 · 200 lines──────────────────┐   
+ │[000] tick=0 panel=0 synthetic even▀│ │[000] tick=0 panel=1 synthetic even▀│ │[000] tick=0 panel=2 synthetic even▀│   
+ │payload bounded text bounded text   │ │payload bounded text bounded text   │ │payload bounded text bounded text   │   
+ │bounded text bounded text bounded   │ │bounded text bounded text bounded   │ │bounded text bounded text bounded   │   
+ │text                                │ │text                                │ │text                                │   
+ │[001] tick=0 panel=0 synthetic even │ │[001] tick=0 panel=1 synthetic even │ │[001] tick=0 panel=2 synthetic even │   
+ │payload bounded text bounded text   │ │payload bounded text bounded text   │ │payload bounded text bounded text   │   
+ │bounded text bounded text bounded   │ │bounded text bounded text bounded   │ │bounded text bounded text bounded   │   
+ │text                                │ │text                                │ │text                                │   
+ │[002] tick=0 panel=0 synthetic even │ │[002] tick=0 panel=1 synthetic even │ │[002] tick=0 panel=2 synthetic even │   
+ │payload bounded text bounded text   │ │payload bounded text bounded text   │ │payload bounded text bounded text   │   
+ │bounded text bounded text bounded   │ │bounded text bounded text bounded   │ │bounded text bounded text bounded   │   
+ │text                                │ │text                                │ │text                                │   
+ └────────────────────────────────────┘ └────────────────────────────────────┘ └────────────────────────────────────┘   
+                                                                                                                        
+ Space/P pause · S stress · R reset · Tab metrics/memory · ←/→ select · Q quit                                          
+                                                                                                                        
+ Local experiment only · no model calls · no Lisp server · no persistence                                               
+                                                                                                                        
+                                                                                                                        

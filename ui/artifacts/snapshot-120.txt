@@ -1,0 +1,40 @@
+SLOPCHAT - tick 24 - messages 0 - summaries 0                                                                           
+┌─History window (Ctrl+P older)────────────────────────────────────────────────────────────────────────────────────────┐
+│text long text long text long text long text long text long text long text long text long text long text long text    │
+│long text long text long text long text long text long text long text long text long text long text                   │
+│198 user message 198 long text long text long text long text long text long text long text long text long text long   │
+│text long text long text long text long text long text long text long text long text long text long text long text    │
+│long text long text long text long text long text long text long text long text long text long text long text long    │
+│text long text long text long text long text long text long text long text long text long text long text long text    │
+│long text long text long text long text long text long text long text long text long text long text long text long    │
+│text long text long text long text long text long text long text long text long text long text long text long text    │
+│long text long text long text long text long text long text long text long text long text long text long text long    │
+│text long text long text long text long text long text long text long text long text long text long text long text    │
+│long text long text long text long text long text long text long text long text long text long text                   │
+│199 user message 199 long text long text long text long text long text long text long text long text long text long   │
+│text long text long text long text long text long text long text long text long text long text long text long text    │
+│long text long text long text long text long text long text long text long text long text long text long text long    │
+│text long text long text long text long text long text long text long text long text long text long text long text    │
+│long text long text long text long text long text long text long text long text long text long text long text long    │
+│text long text long text long text long text long text long text long text long text long text long text long text    │
+│long text long text long text long text long text long text long text long text long text long text long text long    │
+│text long text long text long text long text long text long text long text long text long text long text long text    │
+│long text long text long text long text long text long text long text long text long text long text                  ▄│
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌─Memory: Tab / arrows / Enter zoom / D date───────────────┐Context bytes: peak 7500 (relative chart)                   
+│                                                          │                      ●●●●●●●●●●●●●                         
+│                                                          │●●●●●●●●●●●●●●●●●●●●●●│                                     
+│                                                          │                                                            
+│                                                          │                                                            
+│                                                          │                                                            
+│                                                          │                                                            
+└──────────────────────────────────────────────────────────┘                                                            
+Failed; draft retained. Outcome may be unknown: TransportError: connect ENOENT /tmp/absent-ui-test.sock                 
+                                                                                                                        
+                                                                                                                        
+Привет                                                                                                                  
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+Enter send - Ctrl+Enter/Ctrl+J newline - Ctrl+G send - Tab focus - Ctrl+Q close                                         

@@ -1,0 +1,184 @@
+#+title: slopchat
+
+slopchat is a headless Emacs agent with a durable chat directory. It implements
+Victor Taelin's memory design in =docs/UNIICHAT.md=, using Codex app-server and
+the existing ChatGPT login. No OpenAI or Anthropic API key is required.
+
+The directory identifies the conversation. Ouro's Lisp agent owns its loop and
+its current-turn history. Each model response uses a fresh ephemeral Codex
+thread with explicit history. At an eval request the adapter interrupts App
+Server, returns the request, and lets Lisp execute it. The next response gets
+the tool result from the Lisp agent. The app-server process stays alive across
+responses and summary jobs. Completed user turns retain only the saved memory
+view as conversation context.
+
+* Run in this Docker environment
+
+Emacs 30.2 is installed in =/home/node/.local/opt/emacs-headless=; =emacs= is on
+PATH. Other environments need Emacs 30+, Codex CLI, Python 3, and Linux =flock=
+and =truncate=. =codex login status= must show a ChatGPT login.
+
+From the repository root, start the chat server:
+
+#+begin_src sh
+emacs --batch -Q -L lisp -l slopchat-cli \
+  --eval '(slopchat-serve ".chats/main")'
+#+end_src
+
+In another shell, send a message:
+
+#+begin_src sh
+python3 scripts/slopchat.py .chats/main 'Привет!'
+#+end_src
+
+Another invocation while the agent works sends a clarification through
+=turn/steer= during a model response, or queues it between Lisp tool calls. The clarification command returns =steered=; the original command
+receives the completed reply. If the turn has just ended, the clarification
+starts a fresh turn instead. It is logged once in either case.
+
+#+begin_src sh
+python3 scripts/slopchat.py .chats/main --zoom 0 1
+python3 scripts/slopchat.py .chats/main --date 0
+python3 scripts/slopchat.py .chats/main --note 'We named this project slopchat.'
+python3 scripts/slopchat.py .chats/main --stop
+#+end_src
+
+The local Unix socket =session.sock= has mode 0600. No browser, graphical
+interface, TCP listener, or separate app-server startup is needed. Opening the
+same directory twice fails. Chat directories under =.chats/= are ignored by Git.
+This repository's development conversation is not automatically imported into
+the slopchat journal; use notes for facts you want to carry into it.
+
+* Storage and recovery
+
+=main/YYYY-MM-DD.jsonl= stores original messages with permanent IDs and actual
+UTF-8 byte sizes. =tree/YYYY-MM-DD.jsonl= stores immutable summary nodes. New
+agent replies use kind =slopchat=; old =unii= records remain readable.
+
+=view.json= is an atomic checkpoint object, rather than the upstream bare array.
+It contains =view= and =compactionView= arrays of =[level,index]= pairs, a
+contiguous =cursor=, and pending-batch flags. This keeps the view and recovery
+position consistent without extra transactional infrastructure.
+
+Writes are flushed and fsynced. A normal reopen preserves the saved view. If a
+crash left committed messages or nodes beyond the checkpoint, only that tail is
+published. An incomplete last JSONL record is copied to an =.incomplete-*= file
+and truncated; all complete records remain intact. Other corruption is reported.
+Interrupted Codex execution is not resumed automatically. Completed messages
+survive; an unfinished response or record can be lost.
+
+Text messages are split losslessly at 30,000 UTF-8 bytes. Tool output retains its
+first and last 15,000 characters. =zoom= returns original text in UTF-8-safe
+4,000-byte pages (use =--page=), or the two child nodes of an aligned tree range.
+Reasoning is not logged.
+
+* Memory and Codex
+
+Leaves and ready parents are queued, with at most eight simultaneous summary
+jobs. Sources fitting 512 bytes, including their kind label, need no model call.
+Long sources use context, a 512-dash ruler, and up to five attempts in the same
+summary thread; the shortest answer is retained. Failed jobs retry on the next
+message. User turns wait for their prior messages to be summarized.
+
+The main view merges from 128,000 to 64,000 bytes. The compaction view uses
+32,000/16,000 bytes. Only built sibling parents can merge; an unfinished batch
+continues when more nodes become available. Priority measures age from the
+pair's last message and uses exact integer comparisons.
+
+The shared transport routes replies by request ID and events by thread ID.
+Summary threads receive the same instructions and dynamic tools, but their tool
+handler rejects calls before executing Lisp. Native shell, browser, apps,
+plugins, hooks, subagents, image tools, and configured MCP servers are disabled
+for this owned app-server. The enabled dynamic tools are =emacs_eval=, =zoom=,
+and =date=. Lisp evaluation runs in the host Emacs.
+
+The process reuses the saved ChatGPT login. Its overrides disable Codex memory
+injection/generation and project instruction-file injection without changing
+user-wide configuration. See the official configuration and protocol references:
+https://learn.chatgpt.com/docs/config-file/config-reference
+https://learn.chatgpt.com/docs/app-server
+
+slopchat does not implement Anthropic cache marks or claim its cache prices,
+lifetimes, or hit rates. Stable instructions and batched views preserve useful
+prefixes; Codex's actual caching is provider-managed. Codex may compact a long
+individual tool-running turn internally; this is separate from the persisted
+summary tree. Text-only operation is supported; images, device tools, and
+subagent histories are not implemented.
+
+Model and concurrency settings can be supplied before starting the server:
+
+#+begin_src sh
+emacs --batch -Q -L lisp -l slopchat-cli \
+  --eval '(setq slopchat-summary-model "gpt-6-luna" slopchat-summary-concurrency 2)' \
+  --eval '(slopchat-serve ".chats/main")'
+#+end_src
+
+=slopchat-turn-model= defaults to the user's configured Codex model. With no
+explicit summary model, slopchat selects an advertised Luna/mini/nano model;
+actual access still depends on the account and request. =slopchat-user-instructions=
+adds stable user preferences; set it before running the chat.
+
+* Agent architecture
+
+The runtime preserves the Ouro bootstrap and self-written loop: a minimal bootstrap makes one request
+and evaluates its result once; the agent writes its own continuing Lisp loop.
+The Lisp agent owns tool execution and can develop its own behavior. Codex is
+an adapter providing model access through the existing subscription.
+
+The memory component also uses this model-adapter boundary for bounded summary
+jobs. Agent and summary model choices are independent; short nodes require no
+model call. Summary jobs receive source data and context, produce a summary,
+and never execute tools or bootstrap another agent.
+
+=boot.el= keeps the original one-request, one-eval bootstrap. Its only provider
+boundary is =agent-prompt=. The model creates =agent=; subsequent chat turns use
+that self-written function. Memory access is Lisp =(zoom id n page)= and
+=(date id)=. =lisp/slopchat-model.el= adapts model responses without evaluating
+code; =slopchat-codex.el= handles transport and authentication.
+
+Agent code is retained per chat in the running Emacs. Restarting bootstraps it
+again; the durable message log, summary tree, and view survive. Arbitrary agent
+code and an interrupted task are not restored automatically. A bootstrap that
+fails to define the agent reports an error. The model can generate invalid
+Lisp, as in the original Ouro; there is no hardcoded fallback agent loop.
+
+App Server does not expose a raw Messages endpoint. The adapter supplies the
+explicit transcript as Lisp data and cancels at the tool boundary. This costs
+extra thread setup and transcript transmission per response. =CONTEXT.md=
+records the component boundaries.
+
+* Development
+
+=boot.el= is shared by standalone and production bootstrapping. The production
+chat implementation lives in =lisp/slopchat*.el=. The prepared implementation task is
+=tasks/slopchat.el= and exports =slopchat-task=.
+
+#+begin_src sh
+emacs --batch -Q -l tests/boot-test.el -l tests/slopchat-test.el \
+  -f ert-run-tests-batch-and-exit
+#+end_src
+
+Deterministic tests cover storage/recovery, UTF-8, locking, tree navigation,
+summary retry/scheduling, request routing, fresh user threads, and the view
+sawtooth. Merge ordering is checked against Taelin's rollback push for 20,001
+steps. The long-history test uses a mock model and does not spend subscription
+calls.
+
+* Terminal UI experiment
+
+The isolated =prototypes/opentui-effect/= experiment verifies OpenTUI React
+0.5.17 with Effect 4 / =@effect/atom-react= 4.0.2. It includes a custom native
+framebuffer chart, a textual node diagram, and six-panel stress mode with three
+charts and 600 log lines. All data is synthetic; it makes no agent/model calls
+and does not connect to the Lisp server.
+
+#+begin_src sh
+bun run --cwd prototypes/opentui-effect start
+#+end_src
+
+See [[file:prototypes/opentui-effect/README.md][prototype instructions]] for controls,
+headless benchmarks and the PTY probe. Compatibility passed; the measurements
+show variable frame latency and do not establish terminal-emulator FPS or
+long-run memory stability. The source and measurement artifacts are captured
+on the local =prototype/opentui-effect= branch; the current branch and Git
+index were not changed. Treat this as experimental code.
