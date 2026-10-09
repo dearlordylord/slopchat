@@ -1,51 +1,85 @@
 # SlopChat terminal client
 
-## Launch
-
-From the repository root, install with `bun install --cwd ui`, then run `./scripts/chat-tui` or `./scripts/chat-tui /absolute/chat/directory`. The selected chat must have an existing Lisp server listening on `session.sock`. Plain `slopchat-cli` loads the read-only UI protocol after its handler definitions; no server restart is needed for this checkout's running server.
+From the repository root, run `bun install --cwd ui`, then `./scripts/chat-tui`
+or `./scripts/chat-tui /absolute/chat/directory`. Start the Lisp server first;
+see [the root README](../README.org). The client connects to the selected chat's
+`session.sock`.
 
 ## Controls
 
-Enter sends the composer message; Ctrl+Enter inserts a newline. Ctrl+J is the newline fallback for terminals that cannot distinguish Ctrl+Enter from Enter (use Ctrl+J there). Ctrl+G remains the safe send fallback (avoiding Ctrl+S/XOFF). Sending a different message while the agent works steers the existing turn. Tab switches to memory; arrows select; Enter zooms; D reads the date. Ctrl+P loads older history; Ctrl+Q closes only the UI. Mouse wheel scrolls. The submitted draft clears on acceptance, not on the final model reply; text typed meanwhile is preserved. The composer starts at one logical line, grows and shrinks with explicit newlines up to six lines. Failed sends retain the draft; uncertain outcomes are never automatically retried.
+| Key | Action |
+| --- | --- |
+| Enter | Send the composer message |
+| Ctrl+Enter / Ctrl+J | Insert a newline; use Ctrl+J if the terminal conflates Enter and Ctrl+Enter |
+| Ctrl+G | Alternative send key |
+| Tab | Switch composer/memory focus, or complete a matching slash command |
+| Up / Down | Select a node while memory has focus |
+| Enter / D | Zoom / read the date of the selected memory node |
+| Ctrl+P | Load older history |
+| Mouse wheel | Scroll |
+| Ctrl+O | Toggle the memory map |
+| Ctrl+C / Ctrl+Q | Close the client; the Lisp server continues |
+| Ctrl+R | Retry the published view |
+| Ctrl+B | Restore the initial view for this client |
 
-## Bounds and measurements
+`/map` and `/chat` switch views locally. Type a prefix and press Tab to complete,
+then Enter to execute.
 
-Lisp owns the agent, journal and memory tree. The client polls history/status every 500 ms, rather than streaming tokens. History is capped at 200 messages with 4,000 displayed characters each; memory shows the first 40 nodes; the chart retains 52 context-byte samples. Context bytes are not token counts, cost or terminal FPS. Older pages displace newer messages within the bounded window; new activity moves toward latest history. Read and acceptance requests time out after five seconds; this is not a model-reply timeout. The UI requests an early accepted acknowledgement immediately after durable input logging, before steering or pump/model work, and receives the eventual reply through history polling; UI shutdown cancels its tracked polling/send/inspection work.
+Sending during an active turn steers it. The submitted draft clears after durable
+acceptance; text typed meanwhile is preserved. Failed sends retain the draft.
+Uncertain send outcomes are not automatically retried. The composer grows with
+explicit newlines up to six lines.
 
-## Validation
+New user messages scroll to the end. Assistant replies follow only when already
+at the end, allowing older history to remain in view.
 
-Latest typecheck and full publish passed (exit 0): 11 Bun tests, 60 assertions, and smoke at 60x24 and 120x40. Keyboard-driven memory selection uses real Tab/ArrowDown and bounded real-time waits with renderer flushing; frame-pass waits had expired before asynchronous React updates. Stable-root remount checks retain history, draft, cursor, selection, focus, selected memory and scroll, and prove editor replacement/destruction. Boundary activation and render/import rollback and late acceptance remain covered. Publish produced `view-1791506112227-b78f6393-b753-42e5-b88c-8e48ab355fad.mjs`; running-host activation has not been confirmed for this revision.
+## Display and request bounds
 
-Earlier isolated read-only PTY activation and clean exit passed. PTY sends/cursor and unlimited-update resource stability are not claimed. Emacs bounds/startup regression previously passed 38/38; not rerun for these test-only timing changes.
+The client polls history and status with 500 ms spacing; it does not stream tokens.
+The history window holds at most 200 messages, displaying 4,000 characters per
+message. Older pages displace newer messages within that window. Memory lists
+show the first 40 nodes; the experimental map shows up to 24 with decorative
+positions, not inferred tree edges. The chart retains 52 context-byte samples;
+bytes are not token counts or costs.
 
-## Limitations
+History/status reads time out after five seconds. Send acceptance and memory
+inspection have no client timeout. Acceptance follows durable input logging; the
+eventual reply arrives through history polling. A disconnect can leave a send
+outcome unknown. Read polling reconnects.
 
-No token/cost estimates or terminal-paint performance claims. Successful send/steer is tested deterministically against a scratch transport, not a live model. The current Bun suite does not separately cover server rejection or malformed responses. Polling reconnects for reads; send outcomes may remain unknown after disconnect.
+## Publish a view
 
-## Theme
+From the repository root:
 
-OpenCode V2 TUI dark palette, pinned upstream revision and semantic mapping in [THEME.md](THEME.md). One focused dark default; no theme framework. Readable text snapshots and colored span snapshots are generated by the headless smoke check.
+```sh
+bun ui/src/publish.ts
+```
 
-## Published view updates
+The publisher runs typecheck, Bun tests and headless smoke checks, bundles an
+immutable view, validates its imports/API, and atomically replaces
+`ui/.revisions/current.json`. Source edits alone do not activate.
 
-Start once with `./scripts/chat-tui` (one initial client restart installs the stable host; never restart the Lisp server). Publish explicitly from the repo root with `cd ui && bun src/publish.ts`. Source writes alone do not activate. The command runs typecheck, Bun tests and headless smoke, bundles the App/theme presentation graph into an immutable ESM revision, validates imports/API, then atomically renames `current.json`. Host package dependencies, atom identities and custom chart registration are external; renderer/root/client/polling remain host-owned.
+Confirm activation in the running client's status row and
+`ui/.revisions/activation.json`: the acknowledgement must name the published file,
+the running client's PID, and status `committed`. Publication success alone does
+not confirm activation.
 
-The host status row and `.revisions/activation.json` acknowledge committed revisions. Ctrl+R retries; Ctrl+B restores initial presentation. Import/API rejection keeps the old view; synchronous render failure restores the last committed revision. Candidate modules must have no top-level side effects: import cannot be rolled back. Pending sends are not replayed; late acceptance reports through the shared session notifier.
+The stable host retains its renderer, connection, history and interaction session
+across view replacement. Import/API rejection keeps the old view; a synchronous
+render failure restores the last committed view. Ctrl+R retries the publication;
+Ctrl+B restores the initial presentation locally without changing the pointer.
+Candidate modules must have no top-level side effects because imports cannot be
+rolled back. Pending sends are not replayed; late acceptance uses the shared session.
 
-Verified increment: typecheck and 11 Bun tests (46 assertions) passed; full publish including both smoke sizes passed. Tests cover isolated bundle externalization, draft/cursor/selection remount, late acceptance after remount, and render/import rollback with bounded real-time filesystem waits. Genuine PTY changed actual App header and acknowledged the same Bun PID, then closed with exit 0; backend polling was read-only.
+Restart the client for dependency, native-renderer, host or state-schema changes,
+or to release accumulated module memory. A client predating the stable host needs
+one restart before live publication works. The Lisp server runs independently.
+Eight revision files are retained on disk, but Bun's ESM module cache cannot be
+unloaded; memory use across unlimited revisions is not bounded by disk retention.
 
-Limits: repeated-update resource counts remain unverified; the PTY does not assert cursor or send behavior. Eight revision files are retained on disk, but Bun ESM module cache is not unloadable and memory is not bounded across unlimited revisions. Restart client for dependency/native renderer/host/state-schema changes or accumulated module memory. No backend changes or server restart are required.
+Set `SLOPCHAT_UI_REVISIONS=/absolute/path` for both client and publisher to use an
+isolated publication channel. Its pointer and acknowledgement live in that directory.
 
-Revision isolation: set `SLOPCHAT_UI_REVISIONS=/absolute/path` for both host and publisher to use a separate publication channel. The live PTY probe uses a temporary channel, never changes the production pointer, checks the actual Bun acknowledgement PID before/after, and performs bounded process-group cleanup. Latest isolated PTY passed (exit 0); typecheck and 11 Bun tests passed (47 assertions). Backend definitions were not changed.
-
-Latest bounded update probe: typecheck and all 11 tests passed (96 assertions, exit 0). Twelve consecutive committed scratch revisions retained the renderer and process identity and unchanged keypress listener count. This does not measure polling-fiber counts, native allocations, or unlimited-revision module-cache growth. The isolated PTY probe also passed after the keyboard timing fix, with unchanged acknowledged Bun PID and clean exit.
-
-Final publication also passed typecheck, all 11 tests (96 assertions), and both smoke sizes, exit 0. Published `view-1791506112227-b78f6393-b753-42e5-b88c-8e48ab355fad.mjs`; production-host activation is still unconfirmed. No Lisp-server restart is needed. Install the stable host with one initial UI-client restart if the running client predates it; subsequent presentation publications do not require restart.
-
-### Memory cosmos (experimental)
-
-Ctrl+O toggles a bounded memory constellation and the normal conversation. Tab moves focus to memory; arrows select and Enter zooms via Lisp. Stars represent reported message spans; positions are decorative, not inferred tree edges. Context bytes and working state come from Lisp, not simulated progress. The map displays at most 24 nodes; the memory list remains available below. Ctrl+O avoids the Ctrl+M/Enter collision in legacy terminals.
-
-Slash commands: type `/m` for the `/map` suggestion, Tab completes, Enter opens the map; `/chat` returns to history. These commands stay local and are not sent to Lisp. New messages and changed latest replies scroll conversation to the end; unchanged polls and remounts preserve saved scroll.
-
-Conversation follow policy: a new user message always moves to the end; assistant replies follow only when already at the end. Reading older messages is not interrupted by replies. Verified in the session test alongside remount preservation.
+For palette changes, read [THEME.md](THEME.md). For local checks, run
+`bun run --cwd ui typecheck` and `bun run --cwd ui test` from the repository root;
+the publisher also runs the smoke check.
