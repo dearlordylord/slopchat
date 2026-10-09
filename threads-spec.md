@@ -1,205 +1,200 @@
-# Треды Ouro с общей памятью проекта
+# Independent Ouro threads with shared project memory
 
-Статус: спецификация предлагаемого расширения. Многотредовый режим ещё не реализован.
+Status: proposed extension. Multiple user threads are not implemented yet.
 
-## Цель
+## Goal
 
-В одном проекте можно вести несколько самостоятельных бесед с Ouro и выполнять
-задачи параллельно. У каждого треда собственный исполнитель и текущая работа,
-а постоянная память проекта общая. Решение, принятое в одном треде, доступно
-агентам остальных тредов через память.
+A project can contain several independent conversations with Ouro and execute
+work in parallel. Each thread has its own executor and active work, while the
+project's persistent memory is shared. A decision made in one thread is available
+to other threads through that memory.
 
-Пример: тред «архитектура» обсуждает протокол, тред «интерфейс» реализует экран,
-а тред «эксперименты» проверяет производительность. Пользователь переключается
-между ними в одном TUI.
+Example: an architecture thread discusses a protocol, a UI thread implements
+its interface, and an experiments thread measures performance. The user switches
+between them in one TUI.
 
-## Понятия
+## Terms
 
-- **Проект** — пространство нескольких тредов и их общей постоянной памяти.
-- **Тред** — отдельная беседа с устойчивым ID, собственными пользовательскими
-  ходами и исполнителем Ouro. Переименование не меняет идентичность треда.
-- **Исполнитель треда** — Lisp-агент, владеющий своим самоизменяемым циклом,
-  инструментами и историей текущего выполнения.
-- **Общая память** — журнал событий проекта и дерево резюме над ним.
-- **Представление памяти треда** — выбранный контекст общей памяти, с которым
-  работает конкретный исполнитель.
-- **Снимок памяти** — согласованное представление с границей видимости по
-  глобальному ID события.
+- **Project**: a workspace containing threads and their shared persistent memory.
+- **Thread**: an independent conversation with a stable ID, its own user turns,
+  and an Ouro executor. Renaming a thread does not change its identity.
+- **Thread executor**: a Lisp agent that owns its self-modifying loop, tools,
+  and execution-local history.
+- **Shared memory**: the project's event journal and its summary tree.
+- **Thread memory view**: the context selected from shared memory for one executor.
+- **Memory snapshot**: a consistent view with a visibility boundary expressed
+  as a global event ID.
 
-Тред пользовательской беседы отличается от технического треда модели.
-Codex остаётся адаптером: один ответ модели может использовать новую временную
-сессию, не меняя идентичность пользовательского треда.
+A user conversation thread differs from a technical model thread. Codex remains
+an adapter: a model response may use a new ephemeral session without changing
+the user thread's identity.
 
-## Границы состояния
+## State boundaries
 
-Общими для проекта являются постоянный журнал, дерево резюме и опубликованные
-результаты работы. Каждый тред имеет собственную последовательность сообщений,
-очередь задач, активный ход, уточнения, состояние исполнительного процесса
-и представление памяти.
+The persistent journal, summary tree, and published work results are shared
+within the project. Each thread owns its message sequence, task queue, active
+turn, steering inputs, executor state, and memory view.
 
-Черновик, курсор, фокус, прокрутка и выбранный узел памяти принадлежат вкладке
-TUI. Переключение вкладки не переносит это состояние в другой тред.
+Draft text, cursor, focus, scroll position, and selected memory node belong
+to a TUI tab. Switching tabs does not transfer this state to another thread.
 
-Здесь «отдельная беседа» означает независимое выполнение и отображение.
-Содержимое тредов доступно через общую память проекта; изоляция исполнения
-сама по себе не делает беседу приватной.
+An independent conversation means independent execution and presentation.
+Thread contents remain accessible through shared project memory. Execution
+isolation alone does not make a conversation private.
 
-## Архитектура
+## Architecture
 
 ```text
-TUI: вкладки тредов
-  ├─ интерфейс    → исполнитель Ouro A
-  ├─ архитектура  → исполнитель Ouro B
-  └─ эксперименты → исполнитель Ouro C
-                         │
-               единственный владелец памяти
-                         │
-               общий журнал + дерево резюме
+TUI: thread tabs
+  ├─ UI           → Ouro executor A
+  ├─ architecture → Ouro executor B
+  └─ experiments  → Ouro executor C
+                          |
+                 single memory owner
+                          |
+               shared journal + summary tree
 ```
 
-Рекомендуемая первоначальная реализация — отдельный Emacs-процесс на тред
-и отдельный сервис памяти проекта. Это изолирует переопределение Lisp-функций,
-переменные и сбои исполнителей. Каждый Ouro сохраняет исходную модель:
-сам пишет и развивает свой агентный цикл; управление выполнением не переезжает
-в Codex или TUI.
+The recommended initial implementation uses a separate Emacs process per thread
+and a separate project memory service. This isolates Lisp function redefinition,
+variables, and executor failures. Each Ouro retains the original model: it
+creates and develops its own agent loop. Codex and the TUI do not take ownership
+of execution.
 
-Сервис памяти является единственным писателем её файлов. Исполнители передают
-ему события и получают подтверждения, снимки и результаты чтения. Они
-не открывают один каталог памяти как несколько независимых писателей.
+The memory service is the only writer of memory files. Executors submit events
+and receive acknowledgements, snapshots, and read results. They do not open one
+memory directory as multiple independent writers.
 
-## Журнал и суммаризация
+## Journal and summarization
 
-1. Каждая запись имеет глобальный монотонный `eventId`, `threadId`, вид события
-   и дату. События выполнения также связываются с `turnId`; запрос пользователя
-   имеет ID для сопоставления подтверждения и результата.
-2. Общий журнал — источник истины. История конкретного треда является проекцией
-   записей с его `threadId`. Индексы и локальные кэши можно восстановить.
-3. Подтверждение принятия сообщения отправляется после его постоянного
-   сохранения, до начала работы модели.
-4. Владелец памяти сериализует запись и публикацию узлов дерева. Задания
-   суммаризации могут выполняться параллельно с ограничением числа задач.
-5. Сохраняются модель бинарного дерева, неизменяемость опубликованных узлов,
-   ограниченный контекст и доступ к исходным данным через zoom/date.
-   Диапазоны узлов используют глобальные ID, а не номера в проекции треда.
-6. Несжатый хвост и незавершённые ходы обозначаются явно. Завершённое действие,
-   ошибка и намерение агента не должны становиться одним неразличимым «решением».
+1. Each record has a globally increasing `eventId`, a `threadId`, an event kind,
+   and a timestamp. Execution events also reference a `turnId`. User requests
+   have an ID for correlating acceptance and results.
+2. The shared journal is the source of truth. A thread's history is a projection
+   of records carrying its `threadId`. Indexes and local caches are rebuildable.
+3. Message acceptance is acknowledged after durable storage and before model
+   execution begins.
+4. The memory owner serializes journal writes and tree-node publication.
+   Summarization jobs may run concurrently under a bounded concurrency limit.
+5. Preserve the binary summary tree, immutable published nodes, bounded context,
+   and zoom/date access to source data. Node ranges use global IDs rather than
+   positions in a thread's history projection.
+6. Clearly identify the unsummarized tail and unfinished turns. A completed
+   action, an error, and an agent's intention must remain distinguishable.
 
-Резюме общих диапазонов сохраняют принадлежность важных сведений тредам.
-Интерфейс позволяет отфильтровать собственную беседу и отдельно посмотреть
-общую память.
+Summaries spanning multiple threads preserve the provenance of significant
+information. The interface can filter a thread's conversation and separately
+inspect shared memory.
 
-## Получение контекста
+## Context acquisition
 
-В начале пользовательского хода исполнитель получает снимок общей памяти.
-Его контекст учитывает собственную предыдущую беседу и релевантные сведения
-других тредов в пределах установленного бюджета. Наличие общей памяти
-не требует включать все параллельные сообщения в каждый вызов модели.
+At the start of a user turn, the executor receives a shared-memory snapshot.
+Its context includes its own prior conversation and relevant information from
+other threads within the configured context budget. Sharing memory does not
+require inserting every concurrent message into every model request.
 
-История текущего выполнения остаётся локальной у Lisp-агента. Один ход
-не получает незаметно меняющийся контекст между вызовами модели.
+Execution-local history remains owned by the Lisp agent. A turn does not receive
+silently changing context between model calls.
 
-Во время длительной работы агент может явно обновить снимок памяти и прочитать
-новые сведения. Обновление возвращает новую границу видимости; прочитанный
-результат входит в локальную историю выполнения. При сборке контекста
-повторное включение уже представленных событий должно предотвращаться.
+During a long-running turn, the agent may explicitly refresh its snapshot and
+read new information. A refresh returns a new visibility boundary; the read
+result enters execution-local history. Context assembly must prevent duplicate
+inclusion of events already represented in that context.
 
-Если тред A опубликовал решение после начала хода в треде B, агент B увидит его
-при явном обновлении памяти либо в следующем пользовательском ходе.
-Чтение чужого сообщения не является уточнением задачи треда B.
+If thread A publishes a decision after a turn in thread B has begun, B sees it
+on an explicit memory refresh or on its next user turn. Reading another thread's
+message does not steer B's active task.
 
-## Выполнение и маршрутизация
+## Execution and routing
 
-- В одном треде одновременно выполняется один пользовательский ход.
-  Новое сообщение во время работы уточняет этот ход по существующим правилам.
-- Разные треды могут работать одновременно. Для проекта задаётся общий предел
-  пользовательских выполнений и заданий суммаризации.
-- Запросы, подтверждения, результаты, ошибки и события состояния адресуются
-  конкретным треду и ходу. Переключение вкладки не меняет адрес уже отправленного
-  запроса и не очищает черновик другой вкладки.
-- Завершение процесса одного исполнителя не останавливает другие треды
-  и сервис памяти. Прерванный ход отмечается; инструменты автоматически
-  не проигрываются повторно после восстановления.
-- Обрыв клиентского соединения не означает, что отправка не состоялась.
-  Клиент восстанавливает состояние по журналу и не повторяет неизвестную
-  отправку автоматически.
+- A thread runs one user turn at a time. New input during execution steers that
+  turn according to the existing rules.
+- Different threads may execute concurrently. The project has shared limits
+  for active user executions and summarization jobs.
+- Requests, acknowledgements, results, errors, and state events target a specific
+  thread and turn. Switching tabs does not change an already submitted request's
+  destination or clear another tab's draft.
+- An executor failure does not stop other threads or the memory service.
+  Interrupted turns are marked; tools are not automatically replayed on recovery.
+- A client disconnect does not prove that a send failed. The client resynchronizes
+  from the journal and does not automatically repeat an unknown-outcome send.
 
 ## TUI
 
-### Завершение ходов и уведомления
+### Turn completion and notifications
 
-Завершение определяется явным событием исполнителя. Временная пауза,
-завершение одного вызова модели, подтверждение принятия сообщения
-или отсутствие активной суммаризации не являются завершением хода.
+An explicit executor event determines completion. A pause, completion of one
+model request, message acceptance, or the absence of active summarization does
+not establish that the user turn has finished.
 
-Ход имеет состояния `queued`, `running`, `completed`, `failed`, `cancelled`.
-После финального ответа и завершения работы агентного цикла исполнитель
-публикует `turn.completed` с `threadId`, `turnId` и ссылкой на финальный ответ.
-При ошибке или отмене публикуется соответствующее терминальное событие.
-Владелец памяти сохраняет его в журнале до уведомления клиентов.
+Turn states are `queued`, `running`, `completed`, `failed`, and `cancelled`.
+After the final response and termination of the agent loop, the executor
+publishes `turn.completed` with `threadId`, `turnId`, and a reference to the final
+response. Errors and cancellations publish their corresponding terminal events.
+The memory owner stores the event durably before notifying clients.
 
-Терминальное состояние неизменно. Для одного хода сохраняется только одно
-терминальное событие; повторная доставка не создаёт повторного завершения
-в интерфейсе. Завершённый ход может оставить фоновые задания суммаризации.
+A terminal state is immutable. Only one terminal event is recorded for a turn;
+redelivery does not create duplicate completion notifications in the interface.
+A completed turn may leave background summarization jobs running.
 
-TUI показывает статус во вкладке и выделяет непрочитанное завершение
-в неактивном треде. Подписка или опрос возвращают события после известного
-клиенту `eventId`; повторное подключение восстанавливает пропущенные
-завершения из журнала. Снимок состояния включает последний ход и его статус.
+The TUI displays state in each tab and highlights unread completion in inactive
+threads. A subscription or polling request returns events after the client's
+known `eventId`; reconnecting recovers missed completions from the journal.
+A state snapshot includes the latest turn and its status.
 
-Подтверждение `accepted` означает только сохранение пользовательского
-сообщения. Оно позволяет очистить поле ввода, но не заменяет
-`turn.completed`, `turn.failed` или `turn.cancelled`.
+`accepted` means only that the user message has been stored. It allows the
+composer to clear, but does not replace `turn.completed`, `turn.failed`, or
+`turn.cancelled`.
 
-### Вкладки и история
+### Tabs and history
 
-TUI позволяет создавать и переименовывать треды, переключать вкладки,
-видеть активность и непрочитанные результаты. Новая вкладка открывает новый
-тред в том же проекте.
+The TUI supports creating and renaming threads, switching tabs, and viewing
+activity and unread results. A new tab opens a new thread in the same project.
 
-История выбранного треда и общая память отображаются раздельно. Пользователь
-видит происхождение сведений из другого треда и может открыть исходную запись.
-Закрытие TUI оставляет исполнителей работать. Повторное подключение
-восстанавливает список тредов, их истории и состояние выполнения.
+The selected thread's history and shared memory are presented separately.
+Information from another thread has visible provenance and links to its source.
+Closing the TUI leaves executors running. Reconnecting restores the thread list,
+histories, and execution states.
 
-## Параллельные изменения кода
+## Concurrent code changes
 
-Общая память координирует решения, но не разрешает конфликты файлов.
-Для параллельной разработки рекомендуется отдельный Git worktree на тред
-и явное объединение изменений. Треды сохраняют общую память проекта даже
-при работе в разных worktrees.
+Shared memory coordinates decisions but does not resolve file conflicts.
+For parallel development, use a separate Git worktree per thread and explicitly
+integrate changes. Threads retain shared project memory even when their code
+worktrees differ.
 
-Если треды работают в одном checkout, пересекающиеся изменения файлов
-должны координироваться отдельно. Чужие незавершённые правки не перезаписываются.
+If threads use the same checkout, coordinate overlapping file changes separately.
+Do not overwrite another thread's unfinished edits.
 
-## Совместимость
+## Compatibility
 
-При переходе существующий однопоточный чат становится тредом `main` проекта.
-Его записи получают принадлежность `main`, сохраняя исходные ID, даты
-и диапазоны узлов дерева. Миграция не запускает повторно инструменты
-и не пересуммаризирует всю историю без необходимости.
+The existing single-conversation chat becomes the project's `main` thread.
+Its records acquire `main` provenance while retaining original IDs, timestamps,
+and tree-node ranges. Migration does not replay tools or unnecessarily
+resummarize the entire history.
 
-Старый клиент продолжает обращаться к `main`. Новый протокол явно выбирает
-проект и тред. Существующая идентичность чата по каталогу сохраняется
-как совместимый способ выбрать проект и его основной тред.
+The legacy client continues to address `main`. The new protocol explicitly
+selects a project and thread. Directory-based chat identity remains a compatible
+way to select a project and its main thread.
 
-## Критерии приёмки
+## Acceptance criteria
 
-1. Два треда одновременно выполняют разные задачи и получают собственные
-   ответы, уточнения и ошибки.
-2. Решение из треда A доступно треду B через новую версию общей памяти;
-   источник сведений можно установить.
-3. Параллельная запись не создаёт повторных ID, потерянных сообщений
-   или повреждённых узлов дерева. Порядок истории каждого треда сохраняется.
-4. Снимок памяти не меняется во время хода без явного обновления.
-5. Сбой одного исполнителя сохраняет журнал и не прерывает остальные треды.
-6. Переключение вкладок сохраняет черновики и не меняет адрес отправки.
-   Позднее подтверждение относится к исходной вкладке.
-7. Переподключение восстанавливает истории и активные состояния без повторного
-   выполнения инструментов или неизвестных отправок.
-8. Существующий чат переносится в `main` без потери ID и данных; старый клиент
-   сохраняет работоспособность.
-9. Каждый исполнитель остаётся самостоятельным Ouro; общая память не заменяет
-   его агентный цикл и не передаёт владение выполнением модельному адаптеру.
-10. Клиент различает принятие сообщения, выполнение и терминальное состояние
-    хода. Завершение другого треда видно без переключения вкладки, а пропущенное
-    уведомление восстанавливается после переподключения.
+1. Two threads execute different tasks concurrently and receive their own
+   responses, steering inputs, and errors.
+2. A decision from thread A is available to thread B through a newer shared-memory
+   view, with identifiable provenance.
+3. Concurrent writes do not produce duplicate IDs, lost messages, or corrupted
+   tree nodes. Each thread's history remains ordered.
+4. A turn's memory snapshot changes only through an explicit refresh.
+5. An executor failure preserves the journal and does not interrupt other threads.
+6. Tab switching preserves drafts and request destinations. A late acknowledgement
+   belongs to the original tab.
+7. Reconnecting restores histories and active states without replaying tools
+   or automatically repeating unknown-outcome sends.
+8. The existing chat migrates to `main` without losing IDs or data, and the legacy
+   client remains functional.
+9. Each executor remains an independent Ouro. Shared memory neither replaces
+   its agent loop nor transfers execution ownership to the model adapter.
+10. Clients distinguish message acceptance, execution, and terminal turn state.
+    Completion in another thread is visible without switching tabs, and missed
+    notifications are recovered after reconnecting.
