@@ -35,3 +35,20 @@
     (slopchat-ui-status chat nil)
     (should (equal files (directory-files-recursively directory "\\.\\(jsonl\\|json\\)$")))
     (should (equal before (mapcar (lambda (f) (cons f (slopchat-test-text f))) files)))))))
+
+
+(ert-deftest slopchat-cli-disconnected-clients-released ()
+  (let* ((client (make-pipe-process :name "slopchat-test-client" :noquery t))
+         (other (make-pipe-process :name "slopchat-test-other" :noquery t))
+         (slopchat--clients (list client other)))
+    (unwind-protect
+        (progn
+          (process-put client 'pending "partial request")
+          (slopchat-cli--client-sentinel client "open")
+          (should (= (length slopchat--clients) 2))
+          (delete-process client)
+          (slopchat-cli--client-sentinel client "closed")
+          (should (equal slopchat--clients (list other)))
+          (should-not (process-get client 'pending)))
+      (dolist (p (list client other))
+        (when (process-live-p p) (delete-process p))))))

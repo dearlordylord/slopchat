@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""Keep one chat server running; recover after abnormal exits without replaying turns."""
+import argparse
+import fcntl
+import json
+import logging
+import logging.handlers
+import os
+from pathlib import Path
+import select
+import signal
+import subprocess
+import sys
+import time
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def serve(directory, adopt=None):
+    directory = directory.resolve()
+    directory.mkdir(parents=True, exist_ok=True)
+    lock = (directory / '.supervisor.lock').open('a')
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        raise SystemExit('A supervisor already owns this chat')
+    logger = logging.getLogger('slopchat-supervisor')
+    logger.setLevel(logging.INFO)
+    handler = logging.handlers.RotatingFileHandler(directory / 'supervisor.log', maxBytes=1_000_000, backupCount=2)
+    logger.addHandler(handler)
+    stopping = False
+    child = None
+
+    def record(event, **fields):
+        logger.info(json.dumps(dict(time=time.time(), event=event, **fields)))
+
+    def stop(_signal, _frame):
+        nonlocal stopping
+        stopping = True
+
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+    (directory / 'supervisor.pid').write_text(str(os.getpid()) + '\n')
+    failures = 0
+    try:
+        if adopt:
+            # pidfd binds to this process identity, even if the numeric PID is reused.
+            fd = os.pidfd_open(adopt)
+            try:
+                record('adopted', pid=adopt)
+                while not stopping and not select.select([fd], [], [], .25)[0]:
+                    pass
+                if stopping:
+                    signal.pidfd_send_signal(fd, signal.SIGTERM)
+                    return
+                record('adopted-exit', pid=adopt, reason='exit status unavailable for a non-child')
+            finally:
+                os.close(fd)
+        while not stopping:
+            log_path = directory / 'server.log'
+            if log_path.exists() and log_path.stat().st_size > 5_000_000:
+                log_path.replace(directory / 'server.log.1')
+            started = time.monotonic()
+            with log_path.open('ab', buffering=0) as output:
+                child = subprocess.Popen([
+                    os.environ.get('SLOPCHAT_EMACS', 'emacs'), '--batch', '-Q', '-L', str(ROOT / 'lisp'),
+                    '-l', 'slopchat-cli', '--eval', '(slopchat-serve ' + json.dumps(str(directory)) + ')'
+                ], cwd=ROOT, stdin=subprocess.DEVNULL, stdout=output, stderr=output, start_new_session=True)
+                (directory / 'server.pid').write_text(str(child.pid) + '\n')
+                record('started', pid=child.pid)
+                while child.poll() is None and not stopping:
+                    time.sleep(.25)
+                if stopping and child.poll() is None:
+                    child.terminate()
+                    try:
+                        child.wait(timeout=10)
+                    except subprocess.TimeoutExpired:
+                        child.kill()
+                code = child.wait()
+                record('exited', pid=child.pid, exitCode=code,
+                       signal=-code if code < 0 else None, requested=stopping)
+                child = None
+            if stopping or code == 0:
+                break
+            failures = failures + 1 if time.monotonic() - started < 60 else 1
+            delay = min(30, 2 ** min(failures - 1, 5))
+            record('restart-scheduled', delaySeconds=delay)
+            deadline = time.monotonic() + delay
+            while not stopping and time.monotonic() < deadline:
+                time.sleep(.1)
+    finally:
+        if child and child.poll() is None:
+            child.terminate()
+            try:
+                child.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                child.kill()
+                child.wait()
+        record('supervisor-stopped')
+        (directory / 'supervisor.pid').unlink(missing_ok=True)
+        lock.close()
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('directory', nargs='?', type=Path, default=ROOT / '.chats/main')
+    parser.add_argument('--adopt', type=int, help='Monitor an existing Emacs PID without interrupting it (Linux)')
+    args = parser.parse_args()
+    serve(args.directory, args.adopt)

@@ -3,6 +3,11 @@
 
 (defvar slopchat--server nil)
 (defvar slopchat--clients nil)
+(defun slopchat-cli--client-sentinel (process _event)
+  "Release disconnected clients instead of retaining every polling socket."
+  (unless (process-live-p process)
+    (setq slopchat--clients (delq process slopchat--clients))
+    (process-put process 'pending nil)))
 (defun slopchat-cli--reply (process value)
   (when (process-live-p process)
     (process-send-string process (concat (json-serialize value) "\n"))))
@@ -60,6 +65,7 @@ Run in batch mode. Stop through the local client or by terminating Emacs."
                  :log (lambda (_server client _message)
                         (push client slopchat--clients)
                         (set-process-query-on-exit-flag client nil)
+                        (set-process-sentinel client #'slopchat-cli--client-sentinel)
                         (set-process-filter
                          client (lambda (process text)
                                   (let ((pending (concat (or (process-get process 'pending) "") text)))

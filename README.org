@@ -12,15 +12,18 @@ tasks do not resume automatically.
 * Run
 
 Requirements: Emacs 30+, Codex CLI authenticated with a ChatGPT account, Linux
-=flock= and =truncate=, and Bun for the terminal client. Check authentication with
-=codex login status=. An API key is not required.
+=flock= and =truncate=, Python 3 for the server launcher, and Bun for the terminal
+client. Check authentication with =codex login status=. An API key is not required.
 
 From the repository root, start the server:
 
 #+begin_src sh
-emacs --batch -Q -L lisp -l slopchat-cli \
-  --eval '(slopchat-serve ".chats/main")'
+./scripts/chat-server
 #+end_src
+
+The launcher restarts abnormal exits with bounded backoff and logs exit codes
+and signals in =.chats/main/supervisor.log=. Ctrl+C stops it. Saved memory survives;
+interrupted turns are not replayed. Pass another chat directory as its argument.
 
 In another terminal, from the same repository root:
 
@@ -76,4 +79,5 @@ emacs --batch -Q -L lisp \
   -l tests/slopchat-process-test.el -f ert-run-tests-batch-and-exit
 bun run --cwd ui typecheck
 bun run --cwd ui test
+python3 tests/server-supervisor-test.py
 #+end_src
