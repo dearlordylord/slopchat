@@ -15,7 +15,7 @@ const registry=Registry.make();
 const unpin=pinHostAtoms(registry);
 const client=makeClient(resolve(directory,'session.sock'),registry);
 const fiber=Effect.runFork(client.live);
-const renderer=await createCliRenderer({exitOnCtrlC:true});
+const renderer=await createCliRenderer({exitOnCtrlC:false});
 renderer.on('destroy',()=>{void Promise.all([Effect.runPromise(Fiber.interrupt(fiber)), client.close()]).finally(() => {unpin();registry.dispose()})});
 const session=makeViewSession();
 const host={client,session,atoms,App:()=> <App client={client} session={session} atoms={atoms}/>};

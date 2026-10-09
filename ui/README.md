@@ -10,15 +10,16 @@ see [the root README](../README.org). The client connects to the selected chat's
 | Key | Action |
 | --- | --- |
 | Enter | Send the composer message |
-| Ctrl+Enter / Ctrl+J | Insert a newline; use Ctrl+J if the terminal conflates Enter and Ctrl+Enter |
-| Ctrl+G | Alternative send key |
-| Tab | Switch composer/memory focus, or complete a matching slash command |
+| Ctrl+Enter | Insert a newline |
+| Tab | Queue input for the next round, or complete a matching slash command |
+| Ctrl+F | Switch composer/memory focus |
+| Up / Down | Recall up to 100 accepted inputs at the first / last input line; Down restores the draft |
 | Up / Down | Select a node while memory has focus |
 | Enter / D | Zoom / read the date of the selected memory node |
 | Ctrl+P | Load older history |
 | Mouse wheel | Scroll |
 | Ctrl+O | Toggle the memory map |
-| Ctrl+C / Ctrl+Q | Close the client; the Lisp server continues |
+| Ctrl+C | Clear input; on empty input press twice within one second to exit |
 | Ctrl+R | Retry the published view |
 | Ctrl+B | Restore the initial view for this client |
 
@@ -83,3 +84,30 @@ isolated publication channel. Its pointer and acknowledgement live in that direc
 For palette changes, read [THEME.md](THEME.md). For local checks, run
 `bun run --cwd ui typecheck` and `bun run --cwd ui test` from the repository root;
 the publisher also runs the smoke check.
+
+### Model selector
+
+Type `/models` and press Enter. Use arrows and Enter to select an account-advertised model; Esc cancels. Configured default resets the override. Selection is in-memory, applies to subsequent model responses (not an already-running provider request), and leaves the summary model unchanged. `/m` is now ambiguous; use `/ma` for map completion. Catalog source: Codex `model/list`, not a hard-coded list.
+
+Restart older clients: publishing cannot disable their host renderer automatic Ctrl+C exit. The Lisp server is unaffected.
+
+Esc cancels the active model response and round (without stopping the Lisp server or discarding queued inputs). In the model picker, Esc closes the picker. Cancellation is cooperative at host/tool boundaries; arbitrary blocking Lisp cannot be forcibly interrupted.
+
+### Clipboard selection
+
+Mouse selections are copied on release through terminal OSC 52. iTerm2 usually
+handles Command+C itself rather than delivering it to the application. If
+received, Super+C and Ctrl+Shift+C copy the current selection. Ctrl+C keeps its
+clear/exit behavior. Empty selections do not overwrite the clipboard.
+
+Enable application clipboard access in iTerm2. In tmux, inspect
+`tmux show -s set-clipboard`; `tmux set -s set-clipboard on` permits application
+clipboard writes when disabled. The terminal must advertise OSC 52 (`Ms`).
+These are user settings; the application does not modify them. Emitting OSC 52
+cannot confirm that the terminal accepted the clipboard write.
+
+Ctrl+Y toggles application mouse reporting. When disabled, select with the terminal and use Command+C. Application clicks are unavailable until Ctrl+Y restores reporting. tmux may still capture drags: use iTerm2 Option-drag to bypass reporting or disable tmux mouse yourself. This fallback does not depend on OSC 52.
+
+Agent text previews arrive through Lisp status polling (500 ms). Transient text
+is capped at 16,000 characters and excluded from the journal and summary tree.
+Final replies replace previews; cancelled and failed previews are labelled.

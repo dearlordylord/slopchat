@@ -6,7 +6,7 @@ import { messagesAtom, statusAtom, connectionAtom, samplesAtom } from './state'
 export function makeClient(socket: string, registry: Registry.AtomRegistry) {
  const pending = new Set<Fiber.Fiber<unknown, unknown>>()
  let closed = false
- const run = (effect: Effect.Effect<unknown, unknown>) => {
+ const run = <A,E>(effect: Effect.Effect<A, E>) => {
   if (closed) return Promise.reject(new Error('UI closed'))
   const fiber = Effect.runFork(effect); pending.add(fiber)
   return Effect.runPromise(Fiber.join(fiber)).finally(() => pending.delete(fiber))
@@ -33,5 +33,5 @@ export function makeClient(socket: string, registry: Registry.AtomRegistry) {
   const page = Schema.decodeUnknownSync(Schema.Struct({value:History}))(response).value
   if (page.messages.length) registry.update(messagesAtom, old => [...page.messages, ...old.filter(m => !page.messages.some(n => n.i === m.i))].sort((a,b)=>a.i-b.i).slice(0,200))
  })
- return {live, older, run, close, send: (text:string) => request(socket,{action:'send',text,ack:true},true), inspect: (payload:object) => request(socket,payload)}
+ return {live, older, run, close, send: (text:string,queue=false) => request(socket,{action:'send',text,ack:true,...(queue?{queue:true}:{})},true), inspect: (payload:object) => request(socket,payload)}
 }

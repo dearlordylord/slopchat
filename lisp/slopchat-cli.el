@@ -28,7 +28,8 @@
                            (if ready (funcall deliver reply error)
                              (setq completion (list reply error))))
                          (when ack (lambda (id)
-                           (slopchat-cli--reply process `(:status "accepted" :value ,id)))))))
+                           (slopchat-cli--reply process `(:status "accepted" :value ,id))))
+                         (eq (plist-get request :queue) t))))
 
                (setq ready t)
                (when completion (apply deliver completion)))))
@@ -45,6 +46,8 @@
           ("date"
            (slopchat-cli--reply process
                                 `(:status "data" :value ,(slopchat-date chat (plist-get request :id)))))
+          ("cancel" (slopchat-cli--reply process
+            `(:status "data" :value ,(if (slopchat-cancel-round chat) t :false))))
           ("stop" (slopchat-cli--reply process '(:status "stopping"))
            (when (process-live-p slopchat--server) (delete-process slopchat--server)))
           (_ (error "Unknown action"))))

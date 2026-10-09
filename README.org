@@ -32,9 +32,9 @@ bun install --cwd ui
 ./scripts/chat-tui
 #+end_src
 
-Enter sends; Ctrl+Enter inserts a newline (Ctrl+J is the terminal compatibility
-fallback). Sending while the agent works steers its current turn. Ctrl+C closes
-the client; the server keeps running.
+Enter sends; Ctrl+Enter inserts a newline. Sending while the agent works steers
+its current turn. Ctrl+C clears input; on empty input press twice within one
+second to close the client. The server keeps running.
 
 For another chat, start its server with that directory and run
 =./scripts/chat-tui /absolute/chat/directory=. Only one server can own a chat.
@@ -82,3 +82,10 @@ bun run --cwd ui typecheck
 bun run --cwd ui test
 python3 tests/server-supervisor-test.py
 #+end_src
+
+** Ordinary commands wait in Lisp
+Use =(slopchat-run-command COMMAND WORKDIR TIMEOUT-MS)= for ordinary commands.
+It waits responsively via bounded process-output waits, defaults to 120 seconds,
+returns bounded output and exit code, and reports =timed-out= after cancellation.
+Explicit background work retains exec/write-stdin sessions. Neither mode wakes
+a finished model turn automatically.

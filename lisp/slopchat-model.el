@@ -6,7 +6,7 @@
     :description "Request evaluation of one Emacs Lisp expression by the Lisp agent."
     :inputSchema (:type "object" :properties (:expression (:type "string"))
                   :required ["expression"] :additionalProperties :false))])
-(defun slopchat-model-response (connection directory instructions messages model &optional on-run pump)
+(defun slopchat-model-response (connection directory instructions messages model &optional on-run pump on-event)
   "Return Ouro content blocks for MESSAGES without executing requested tools.
 App Server is interrupted at the first tool boundary. Each response uses a
 fresh thread; continuation history is supplied explicitly by the Lisp agent."
@@ -18,7 +18,7 @@ fresh thread; continuation history is supplied explicitly by the Lisp agent."
                   slopchat-model-eval-tools model))
          (run (slopchat-codex-run connection thread
                                      (concat "Conversation (Emacs Lisp data):\n" (prin1-to-string messages))
-                                     nil nil nil 'model))
+                                     nil on-event nil 'model))
          content)
     (setf (slopchat-run-deferred run) t)
     (unwind-protect

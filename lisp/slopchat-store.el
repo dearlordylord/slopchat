@@ -28,7 +28,7 @@
 (cl-defstruct (slopchat-chat (:constructor slopchat--chat-create))
   directory lock (count 0) messages nodes (cursor 0) view comp-view
   batching comp-batching jobs leaves (leaf-slots 0) states failed (active 0) transport run queued-input
-  agent closed)
+  agent closed stream)
 
 (defun slopchat-bytes (text) (length (encode-coding-string text 'utf-8-unix)))
 (defun slopchat-split (text limit)

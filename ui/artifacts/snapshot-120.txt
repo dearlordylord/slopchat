@@ -1,5 +1,15 @@
 SLOPCHAT - tick 24 - messages 0 - summaries 0                                                                           
 ┌─History window (Ctrl+P older)────────────────────────────────────────────────────────────────────────────────────────┐
+│long text long text long text long text long text long text long text long text long text long text long text long    │
+│text long text long text long text long text long text long text long text long text long text long text long text    │
+│long text long text long text long text long text long text long text long text long text long text long text long    │
+│text long text long text long text long text long text long text long text long text long text long text long text    │
+│long text long text long text long text long text long text long text long text long text long text long text long    │
+│text long text long text long text long text long text long text long text long text long text long text long text    │
+│long text long text long text long text long text long text long text long text long text long text                   │
+│197 user message 197 long text long text long text long text long text long text long text long text long text long   │
+│text long text long text long text long text long text long text long text long text long text long text long text    │
+│long text long text long text long text long text long text long text long text long text long text long text long    │
 │text long text long text long text long text long text long text long text long text long text long text long text    │
 │long text long text long text long text long text long text long text long text long text long text long text long    │
 │text long text long text long text long text long text long text long text long text long text long text long text    │
@@ -25,16 +35,6 @@ SLOPCHAT - tick 24 - messages 0 - summaries 0
 │text long text long text long text long text long text long text long text long text long text long text long text    │
 │long text long text long text long text long text long text long text long text long text long text                  ▄│
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-┌─Memory: Tab / arrows / Enter zoom / D date───────────────┐Context bytes: peak 7500 (relative chart)                   
-│                                                          │                      ●●●●●●●●●●●●●                         
-│                                                          │●●●●●●●●●●●●●●●●●●●●●●│                                     
-│                                                          │                                                            
-│                                                          │                                                            
-│                                                          │                                                            
-│                                                          │                                                            
-└──────────────────────────────────────────────────────────┘                                                            
 Failed; draft retained. Outcome may be unknown: TransportError: connect ENOENT /tmp/absent-ui-test.sock                 
-                                                                                                                        
-                                                                                                                        
-Привет                                                                                                                  
-Enter send - Ctrl+Enter/Ctrl+J newline - Ctrl+G send - Tab focus - /map /chat - Tab complete - Ctrl+O map - Ctrl+Q close
+Hello 🌍                                                                                                                
+Enter send - Ctrl+Enter newline - Tab queue - Ctrl+F focus - /map /chat - Tab complete - Ctrl+O map - Ctrl+C clear /    
