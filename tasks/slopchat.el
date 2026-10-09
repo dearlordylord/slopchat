@@ -124,7 +124,7 @@ changing the behavior.
 
 Verification and acceptance:
 - Add deterministic ERT tests with a mock summarizer/model transport, covering
-  byte counting with Cyrillic/emoji, lossless splitting/reassembly, clipping,
+  byte counting with UTF-8/emoji, lossless splitting/reassembly, clipping,
   log durability/reopen, lock exclusion, node idempotence, zoom/date validation,
   exact range coverage, merge priority/ties, batching and delayed parents,
   compaction retries, queue scheduling, and fresh threads between user turns.

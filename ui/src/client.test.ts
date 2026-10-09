@@ -16,7 +16,7 @@ test('older history merges in order and stops at zero', async()=>{
 import { request } from './transport'
 test('fragmented JSONL and unknown send disconnect', async()=>{
  const socket='/tmp/slopchat-transport-'+process.pid+'.sock';
- const server=createServer(c=>c.once('data',raw=>{const p=JSON.parse(raw.toString()); if(p.action==='send'){c.end();return} const line=JSON.stringify({status:'data',value:'unicode \u041f\u0440\u0438\u0432\u0435\u0442'})+'\n'; c.write(line.slice(0,13)); setImmediate(()=>c.end(line.slice(13)))}));
+ const server=createServer(c=>c.once('data',raw=>{const p=JSON.parse(raw.toString()); if(p.action==='send'){c.end();return} const line=JSON.stringify({status:'data',value:'unicode Hello \u{1F30D}'})+'\n'; c.write(line.slice(0,13)); setImmediate(()=>c.end(line.slice(13)))}));
  await new Promise<void>(r=>server.listen(socket,r));
  try {const response=await Effect.runPromise(request(socket,{action:'history'})); expect(JSON.stringify(response)).toContain('unicode'); const error=await Effect.runPromise(request(socket,{action:'send',text:'test'},true)).catch(e=>e); expect(String(error)).toContain('Connection closed'); } finally {await new Promise<void>(r=>server.close(()=>r()))}
 })

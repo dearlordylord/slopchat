@@ -33,7 +33,7 @@
 
 (ert-deftest slopchat-json-tool-text-utf8-survives-reopen ()
   (slopchat-with-chat
-    (let* ((payload '(:name "emacs_eval" :input (:expression "(message \"Привет 🌍\")")))
+    (let* ((payload '(:name "emacs_eval" :input (:expression "(message \"Hello 🌍\")")))
            (bytes (json-serialize payload))
            (text (decode-coding-string bytes 'utf-8-unix)))
       (should-not (multibyte-string-p bytes))
@@ -44,16 +44,16 @@
         (should (equal (plist-get saved :text) text))
         (should (= (plist-get saved :size) (slopchat-bytes text)))
         (should (equal (plist-get (plist-get (slopchat--json-read (plist-get saved :text)) :input) :expression)
-                       "(message \"Привет 🌍\")"))))))
+                       "(message \"Hello 🌍\")"))))))
 
-(ert-deftest slopchat-ouro-bootstrap-with-russian-expression ()
+(ert-deftest slopchat-ouro-bootstrap-with-unicode-expression ()
   (slopchat-with-chat
-    (let ((written "(progn (defun agent (_prompt) \"Привет 🌍\") (agent \"Задача\"))"))
+    (let ((written "(progn (defun agent (_prompt) \"Hello 🌍\") (agent \"Task\"))"))
       (cl-letf (((symbol-function 'slopchat--connection) (lambda (_) 'fake))
                 ((symbol-function 'slopchat-model-response)
                  (lambda (&rest _)
                    `(((type . "tool_use") (id . "bootstrap")
                       (input . ((expression . ,written))))))))
-        (should (equal (slopchat-send chat "Привет") "Привет 🌍"))
+        (should (equal (slopchat-send chat "Hello") "Hello 🌍"))
         (should (slopchat-chat-agent chat))
         (should (equal (plist-get (gethash 1 (slopchat-chat-messages chat)) :kind) "tool"))))))

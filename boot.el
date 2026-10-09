@@ -27,6 +27,7 @@ reply without calling a tool. Use alist response blocks (type, id, name, input, 
 :role and :content. Use vectors for message arrays. Call agent-eval for each
 expression, and return final text as a string. Keep history local to each
 invocation of agent.
+Write authored code and comments in English; preserve user-provided text as data.
 Then call your new `agent' with the user's task:
 
 %s")

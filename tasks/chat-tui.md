@@ -43,7 +43,7 @@ Implement this work yourself through Lisp eval and ordinary build/test tools.
 Required experience:
 
 - A scrollable conversation showing user/agent messages and concise tool activity.
-- A usable multiline composer: send, edit, paste, Unicode/Russian input, scroll,
+- A usable multiline composer: send, edit, paste, Unicode input, scroll,
   focus changes and visible shortcut help. Choose terminal-safe shortcuts;
   provide a fallback if Ctrl+Enter cannot be distinguished by a terminal.
 - Sending calls the actual server's `send` action. Show working, result, error,
