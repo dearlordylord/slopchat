@@ -28,6 +28,12 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
   key source context thread (attempts 0) shortest finished)
 (cl-defstruct (slopchat-input (:constructor slopchat--input-create)) text first callback steer)
 
+(defun slopchat--record-input-error (chat input error)
+  "Make a failed accepted input visible even after its client disconnects."
+  (let ((text (format "Turn failed (input %s): %s" (slopchat-input-first input) error)))
+    (slopchat-log chat "work" text)
+    (message "%s" text)))
+
 (defun slopchat--instructions ()
   (concat slopchat-system-prompt "\n\n# User instructions\n" slopchat-user-instructions))
 (defun slopchat--connection (chat)
@@ -159,6 +165,8 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
                 (< (slopchat-chat-cursor chat)
                    (slopchat-input-first (car (slopchat-queue-head (slopchat-chat-queued-input chat))))))
       (let ((input (slopchat-dequeue (slopchat-chat-queued-input chat))))
+        (slopchat--record-input-error
+         chat input "Prior summaries failed; your message is saved. Retry with a new message")
         (when (slopchat-input-callback input)
           (funcall (slopchat-input-callback input) nil
                    "Prior summaries failed; your message is saved. Retry with a new message")))))
@@ -191,6 +199,7 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
             (funcall slopchat-turn-function chat prompt
                      (lambda (text error)
                        (when text (slopchat-log chat "slopchat" text))
+                       (when error (slopchat--record-input-error chat input error))
                        (setf (slopchat-chat-run chat) nil)
                        (when (slopchat-input-callback input)
                          (funcall (slopchat-input-callback input) text error))))
@@ -246,6 +255,7 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
               (funcall (slopchat-input-callback input) reply nil))))
       (error
        (setf (slopchat-chat-run chat) nil)
+       (slopchat--record-input-error chat input (error-message-string err))
        (if (slopchat-input-callback input)
            (funcall (slopchat-input-callback input) nil (error-message-string err))
          (signal (car err) (cdr err)))))))

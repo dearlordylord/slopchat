@@ -76,7 +76,8 @@ Run the deterministic checks from the repository root:
 emacs --batch -Q -L lisp \
   -l tests/boot-test.el -l tests/slopchat-test.el \
   -l tests/slopchat-ui-test.el -l tests/slopchat-accept-test.el \
-  -l tests/slopchat-process-test.el -f ert-run-tests-batch-and-exit
+  -l tests/slopchat-process-test.el -l tests/slopchat-failure-test.el \
+  -f ert-run-tests-batch-and-exit
 bun run --cwd ui typecheck
 bun run --cwd ui test
 python3 tests/server-supervisor-test.py

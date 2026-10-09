@@ -240,6 +240,10 @@ Compare integer cross-products; TOTAL is the number of logged messages."
 (defun slopchat-log (chat kind text)
   "Append TEXT losslessly (except clipped echo), returning its message IDs."
   (when (slopchat-chat-closed chat) (error "Chat is closed"))
+  ;; Emacs json-serialize returns unibyte UTF-8. Decode before nesting that
+  ;; JSON as message text; raw non-ASCII bytes are not valid JSON string values.
+  (unless (multibyte-string-p text)
+    (setq text (decode-coding-string text 'utf-8-unix)))
   (unless (member kind '("user" "slopchat" "unii" "tool" "echo" "work" "note"))
     (error "Unknown message kind: %s" kind))
   (let ((parts (if (equal kind "echo") (list (slopchat-clip text))

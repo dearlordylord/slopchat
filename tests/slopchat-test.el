@@ -294,7 +294,8 @@
      (slopchat-schedule chat)
      (slopchat-submit chat "next" (lambda (_text error) (setq reported error)))
      (should (string-match-p "Prior summaries failed" reported))
-     (should (= (slopchat-chat-count chat) 2))
+     (should (= (slopchat-chat-count chat) 3))
+     (should (equal (plist-get (gethash 2 (slopchat-chat-messages chat)) :kind) "work"))
      (should-not (slopchat-queue-head (slopchat-chat-queued-input chat))))))
 (ert-deftest slopchat-ouro-bootstrap-loop-and-next-turn ()
   (slopchat-with-chat
