@@ -37,4 +37,4 @@ Failed; draft retained. Outcome may be unknown: TransportError: connect ENOENT /
                                                                                                                         
                                                                                                                         
 Привет                                                                                                                  
-Enter send - Ctrl+Enter/Ctrl+J newline - Ctrl+G send - Tab focus - Ctrl+Q close                                         
+Enter send - Ctrl+Enter/Ctrl+J newline - Ctrl+G send - Tab focus - /map /chat - Tab complete - Ctrl+O map - Ctrl+Q close

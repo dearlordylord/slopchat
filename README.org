@@ -182,3 +182,17 @@ show variable frame latency and do not establish terminal-emulator FPS or
 long-run memory stability. The source and measurement artifacts are captured
 on the local =prototype/opentui-effect= branch; the current branch and Git
 index were not changed. Treat this as experimental code.
+
+* Bounded process sessions
+
+Through eval, use =(slopchat-exec-command COMMAND WORKDIR YIELD-MS)=,
+then =(slopchat-write-stdin SESSION-ID CHARS YIELD-MS)=. Empty CHARS polls
+the existing command without restarting it. Continue polling a running command
+until completion when its result is required; do not leave a promise of work
+without collecting the result. Each call waits at most 10 seconds (default 1s),
+returns incremental output, status and an exit code on completion. Output is
+bounded to 65,536 characters with an explicit dropped-character count; at most
+16 uncollected sessions are retained. Collect completed sessions to release them.
+Use =(slopchat-cancel-process SESSION-ID)= to terminate a session. These are
+pipe-based, in-memory sessions, not PTYs or durable jobs; automatic continuation
+after a finished user turn or server restart is not implemented.

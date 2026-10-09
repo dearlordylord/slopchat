@@ -2,7 +2,7 @@ import { theme } from './theme'
 import { FrameBufferRenderable, RGBA, type FrameBufferOptions, type OptimizedBuffer, type RenderContext } from "@opentui/core"
 import { extend, type ExtendedComponentProps } from "@opentui/react"
 
-interface ChartOptions extends FrameBufferOptions { samples?: ReadonlyArray<number> }
+interface ChartOptions extends FrameBufferOptions { samples?: ReadonlyArray<number>; colors?: typeof theme }
 const background = RGBA.fromHex(theme.background)
 const cyan = RGBA.fromHex(theme.chart)
 const grid = RGBA.fromHex(theme.border)
@@ -10,13 +10,17 @@ const violet = RGBA.fromHex(theme.muted)
 // A custom core framebuffer renderable, not an upstream chart widget.
 export class MetricsChart extends FrameBufferRenderable {
   private values: ReadonlyArray<number>
+  private palette: typeof theme = theme
+  set colors(value: typeof theme) { this.palette=value;this.requestRender() }
   constructor(ctx: RenderContext, options: ChartOptions) {
     super(ctx, options)
     this.values = options.samples ?? []
+    this.palette=options.colors??theme
   }
   set samples(samples: ReadonlyArray<number>) { this.values = samples; this.requestRender() }
   protected override renderSelf(buffer: OptimizedBuffer) {
     const fb = this.frameBuffer
+    const background=RGBA.fromHex(this.palette.background),cyan=RGBA.fromHex(this.palette.chart),grid=RGBA.fromHex(this.palette.border),violet=RGBA.fromHex(this.palette.muted)
     fb.clear(background)
     const width = fb.width; const height = fb.height
     const compact = height < 7

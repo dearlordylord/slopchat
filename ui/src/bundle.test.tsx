@@ -1,0 +1,3 @@
+import {test,expect} from 'bun:test'
+import {resolve} from 'node:path'
+test('isolated presentation build excludes host identities',async()=>{const root=resolve(import.meta.dir,'..');const result=await Bun.build({entrypoints:[resolve(root,'src/view.tsx')],target:'bun',packages:'external',plugins:[{name:'host',setup(b){b.onResolve({filter:/host-atoms|chart$/},a=>({path:resolve(root,'src',a.path+'.ts'),external:true}))}}]});expect(result.success).toBe(true);const source=await result.outputs[0].text();expect(source).toContain('SLOPCHAT');expect(source).toContain('#0a0a0a');expect(source).toContain('host-atoms');expect(source).not.toContain('Atom.make');expect(source).not.toContain('extend({');})

@@ -3,6 +3,7 @@
 (require 'slopchat-codex)
 (require 'slopchat-prompt)
 (require 'slopchat-model)
+(require 'slopchat-process)
 (load (expand-file-name "../boot.el" (file-name-directory load-file-name)) nil t)
 (defvar slopchat-current-chat nil "Chat visible to the self-developed Lisp agent.")
 (defvar slopchat--ouro-updates nil)

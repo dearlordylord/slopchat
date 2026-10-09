@@ -3567,7 +3567,7 @@
     {
       "spans": [
         {
-          "text": "Enter send - Ctrl+Enter/Ctrl+J newline - Ctrl+G send - Tab focus - Ctrl+Q close",
+          "text": "Enter send - Ctrl+Enter/Ctrl+J newline - Ctrl+G send - Tab focus - /map /chat - Tab complete - Ctrl+O map - Ctrl+Q close",
           "fg": {
             "buffer": {
               "0": 128,
@@ -3585,28 +3585,7 @@
             }
           },
           "attributes": 0,
-          "width": 79
-        },
-        {
-          "text": "                                         ",
-          "fg": {
-            "buffer": {
-              "0": 255,
-              "1": 255,
-              "2": 255,
-              "3": 255
-            }
-          },
-          "bg": {
-            "buffer": {
-              "0": 10,
-              "1": 10,
-              "2": 10,
-              "3": 255
-            }
-          },
-          "attributes": 0,
-          "width": 41
+          "width": 120
         }
       ]
     }

@@ -1,0 +1,4 @@
+import {uiCommands} from './ui-commands'
+import {theme} from './theme'
+import type {Status} from './protocol'
+export function MemoryMap({status,selected}:{status:Status|null|undefined;selected:number}){return <scrollbox id='memory-map' flexGrow={1} border borderColor={theme.agent} backgroundColor={theme.background} title={'Memory cosmos - '+uiCommands.chat}><text fg={theme.agent}>MEMORY CONSTELLATION</text>{(status?.nodes??[]).slice(0,24).map((n,i)=><text key={n.id} fg={i===selected?theme.user:theme.agent}>{' '.repeat(2+(i*13)%19)+(i===selected?'[*] ':n.n>=8?'** ':'. ')+n.id+'+'+n.n+' '+n.text.slice(0,34)}</text>)}<text fg={theme.tool}>{'CONTEXT ORBIT: '+(status?.contextBytes??0)+' bytes / '+(status?.viewTotal??0)+' entries'}</text><text fg={theme.success}>{status?.working?'Agent working':'Agent idle'}</text><text fg={theme.muted}>Positions decorative; star size = message span. Tab / arrows / Enter zoom.</text></scrollbox>}
