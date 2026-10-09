@@ -1,0 +1,48 @@
+{
+  "versions": {
+    "bun": "1.3.14",
+    "opentui": "0.5.17",
+    "react": "19.3.0",
+    "effect": "4.0.2"
+  },
+  "samples": [
+    {
+      "pid": 3891110,
+      "mounts": 1,
+      "roots": 1,
+      "renderers": 1,
+      "revision": "v1",
+      "errors": 0,
+      "frame": "v1 | typed draft | changed local"
+    },
+    {
+      "pid": 3891110,
+      "mounts": 2,
+      "roots": 1,
+      "renderers": 1,
+      "revision": "v2",
+      "errors": 0,
+      "frame": "v2 | typed draft | initial local"
+    },
+    {
+      "pid": 3891110,
+      "mounts": 2,
+      "roots": 1,
+      "renderers": 1,
+      "revision": "v2",
+      "errors": 1,
+      "frame": "v2 | typed draft | initial local"
+    },
+    {
+      "pid": 3891110,
+      "mounts": 3,
+      "roots": 1,
+      "renderers": 1,
+      "revision": "v3",
+      "errors": 1,
+      "frame": "v3 | typed draft | initial local"
+    }
+  ],
+  "syntaxBuildRejected": true,
+  "limits": "Headless demonstration only: external Atom value, one renderer/root, immutable bundles; no actual textarea/cursor, terminal, socket, pending send, render-failure rollback or long-run leak test."
+}
