@@ -21,4 +21,4 @@ SLOPCHAT - tick 24 - messages 0 - summaries 0
 └──────────────────────────────────────────────────────────┘
 Failed; draft retained. Outcome may be unknown:            ▀
 Hello 🌍                                                    
-Enter send - Ctrl+Enter newline - Tab queue - Ctrl+F focus -
+Enter send - Ctrl+Enter newline - Tab queue / focus - Ctrl+F

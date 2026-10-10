@@ -107,3 +107,46 @@
      (slopchat--stream-event chat token "item/agentMessage/delta" '(:delta "late"))
      (should (= (length (plist-get (slopchat-chat-stream chat) :text)) 16000)))
     (remhash chat slopchat--rounds)))))
+
+(ert-deftest slopchat-ui-tool-presentation ()
+ (slopchat-with-chat
+  (should (equal (slopchat--tool chat "emacs_eval" '(:expression "(+ 1 2)")) "3"))
+  (let* ((call (gethash 0 (slopchat-chat-messages chat)))
+         (result (gethash 1 (slopchat-chat-messages chat))))
+   (should (equal (plist-get (plist-get call :tool) :callId)
+                  (plist-get (plist-get result :tool) :callId)))
+   (should (equal (plist-get (plist-get result :tool) :state) "completed"))
+   (should (equal (plist-get result :text) "3")))
+  (should-error (slopchat--tool chat "emacs_eval" '(:expression "(error \"oops\")")))
+  (should (equal (plist-get (plist-get (gethash 3 (slopchat-chat-messages chat)) :tool) :state) "error"))))
+
+(ert-deftest slopchat-ui-large-tool-expression-is-bounded-and-lossless ()
+  (slopchat-with-chat
+   (let* ((expression (concat ";" (make-string 400000 ?x)))
+          (text (json-serialize (list :name "emacs_eval" :input (list :expression expression))))
+          (slopchat-log-context-id "session:exact")
+          (ids (slopchat-log chat "tool" text (list :callId "large" :name "emacs_eval"
+                                                   :expression expression :state "running")))
+          (page (slopchat-ui-history chat '(:limit 100)))
+          (bytes (string-bytes (json-serialize page)))
+          (offset 0) pages)
+     (should (< bytes 1000000))
+     (should (> (length ids) 10))
+     (dolist (message (append (plist-get page :messages) nil))
+       (should (equal (plist-get message :contextId) "session:exact"))
+       (should (<= (length (plist-get (plist-get message :tool) :expression)) 2000)))
+     (while (< offset (length expression))
+       (let ((part (slopchat-ui-tool-expression chat (list :id (car ids) :offset offset))))
+         (should (<= (length (plist-get part :text)) 2000))
+         (push (plist-get part :text) pages)
+         (setq offset (plist-get part :end))))
+     (should (equal (apply #'concat (nreverse pages)) expression)))))
+
+(ert-deftest slopchat-ui-legacy-tool-metadata-is-bounded ()
+  (slopchat-with-chat
+   (slopchat-log chat "tool" "legacy")
+   (let ((message (gethash 0 (slopchat-chat-messages chat))))
+     (puthash 0 (plist-put message :tool (list :callId "legacy" :name "eval"
+                                             :state "completed" :expression (make-string 400000 ?x)))
+              (slopchat-chat-messages chat)))
+   (should (< (string-bytes (json-serialize (slopchat-ui-history chat '(:limit 100)))) 5000))))

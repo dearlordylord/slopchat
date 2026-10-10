@@ -46,23 +46,15 @@ python3 scripts/slopchat.py .chats/main 'Hello!'
 python3 scripts/slopchat.py --help
 #+end_src
 
-* Update the running terminal view
+* Update the terminal client
 
-Publish presentation changes from the repository root:
-
-#+begin_src sh
-bun ui/src/publish.ts
-#+end_src
-
-Publication runs typecheck, tests and headless smoke checks. It is active only
-when the running client's status row acknowledges it and
-=ui/.revisions/activation.json= records the published file and that client's PID
-with status =committed=. Source edits alone do not activate. Host, dependency,
-native-renderer and state-schema changes require a client restart.
+Source changes take effect when the TUI client is relaunched with
+=./scripts/chat-tui=. There is no hot view replacement or publication polling.
+The Lisp server runs independently and does not need restarting.
 
 * Development and design
 
-- For UI controls, display bounds, publication rollback or revision isolation,
+- For UI controls, display bounds, client lifecycle,
   read [[file:ui/README.md][ui/README.md]].
 - When changing component responsibilities or domain terminology, read
   [[file:CONTEXT.md][CONTEXT.md]].

@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")/.."
+pid=${1:?Usage: chat-tui-reload TUI-PID}
+bun run --cwd ui typecheck
+file=$(bun ui/src/build-manual-view.ts)
+python3 - "$pid" "$file" <<'PY'
+import json, os, socket, sys, tempfile
+s = socket.socket(socket.AF_UNIX)
+s.settimeout(15)
+s.connect(os.path.join(tempfile.gettempdir(), 'slopchat-ui-'+str(os.getuid()), sys.argv[1]+'.sock'))
+s.sendall((json.dumps({'file':sys.argv[2]})+chr(10)).encode())
+data=b''
+while bytes([10]) not in data:
+ chunk=s.recv(8192)
+ if not chunk: raise RuntimeError('Connection closed before acknowledgement; outcome unknown')
+ data+=chunk
+result=json.loads(data.splitlines()[0]);print(json.dumps(result))
+if result.get('status')!='committed': sys.exit(1)
+PY

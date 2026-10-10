@@ -1,0 +1,40 @@
+;;; slopchat-memory-usage.el --- Session memory-work accounting -*- lexical-binding: t -*-
+(require 'cl-lib)
+(defvar slopchat-memory-usage--ledgers (make-hash-table :test #'eq :weakness 'key))
+(cl-defstruct (slopchat-memory-usage (:constructor slopchat-memory-usage-create))
+  (started 0) (input 0) (output 0) (input-observed 0) (output-observed 0)
+  (attempts (make-hash-table :test #'equal)))
+(defun slopchat-memory-usage-ledger (chat)
+  "Return session accounting independent of request snapshot retention."
+  (or (gethash chat slopchat-memory-usage--ledgers)
+      (puthash chat (slopchat-memory-usage-create) slopchat-memory-usage--ledgers)))
+(defun slopchat-memory-usage-start (ledger id)
+  "Register one attempt exactly once."
+  (unless (gethash id (slopchat-memory-usage-attempts ledger))
+    (cl-incf (slopchat-memory-usage-started ledger))
+    (puthash id (list :started t) (slopchat-memory-usage-attempts ledger))))
+(defun slopchat-memory-usage-observe (ledger id counters)
+  "Replace explicitly reported counters; duplicates do not increase sums."
+  (let ((entry (gethash id (slopchat-memory-usage-attempts ledger))))
+    (when entry
+      (dolist (key '(:input :output))
+        (let ((value (plist-get counters key)) (old (plist-get entry key)))
+          (when (natnump value)
+            (if (eq key :input)
+                (progn (cl-incf (slopchat-memory-usage-input ledger) (- value (or old 0)))
+                       (unless old (cl-incf (slopchat-memory-usage-input-observed ledger))))
+              (cl-incf (slopchat-memory-usage-output ledger) (- value (or old 0)))
+              (unless old (cl-incf (slopchat-memory-usage-output-observed ledger))))
+            (setq entry (plist-put entry key value)))))
+      (puthash id entry (slopchat-memory-usage-attempts ledger)))))
+(defun slopchat-memory-usage-project (ledger)
+  "Project known subtotals with separate coverage; missing is not zero."
+  (list :started (slopchat-memory-usage-started ledger)
+        :input (slopchat-memory-usage-input ledger)
+        :output (slopchat-memory-usage-output ledger)
+        :inputObserved (slopchat-memory-usage-input-observed ledger)
+        :outputObserved (slopchat-memory-usage-output-observed ledger)))
+(provide 'slopchat-memory-usage)
+(defun slopchat-memory-usage-retire (ledger id)
+  "Release late-update state without reducing accumulated totals."
+  (remhash id (slopchat-memory-usage-attempts ledger)))

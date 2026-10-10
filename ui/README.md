@@ -20,8 +20,6 @@ see [the root README](../README.org). The client connects to the selected chat's
 | Mouse wheel | Scroll |
 | Ctrl+O | Toggle the memory map |
 | Ctrl+C | Clear input; on empty input press twice within one second to exit |
-| Ctrl+R | Retry the published view |
-| Ctrl+B | Restore the initial view for this client |
 
 `/map` and `/chat` switch views locally. Type a prefix and press Tab to complete,
 then Enter to execute.
@@ -48,48 +46,29 @@ inspection have no client timeout. Acceptance follows durable input logging; the
 eventual reply arrives through history polling. A disconnect can leave a send
 outcome unknown. Read polling reconnects.
 
-## Publish a view
+## Apply client changes
 
-From the repository root:
+Relaunch the TUI once to enable explicit reload requests. Then run
+`./scripts/chat-tui-reload TUI-PID` to typecheck, build an immutable bundle,
+and request replacement through a private local socket. There is no file
+watcher or publication polling. The host retains the client, registry and
+view session. Render failures restore the previous view; acknowledgement
+follows the React commit, not proof of a painted terminal frame. A timeout
+means the outcome is unknown: do not automatically retry.
 
-```sh
-bun ui/src/publish.ts
-```
+This is an opt-in development operation, not a sandbox. Imported code can
+have side effects that rollback cannot undo. Host/chart changes still
+require a TUI restart. The Lisp server does not need restarting.
 
-The publisher runs typecheck, Bun tests and headless smoke checks, bundles an
-immutable view, validates its imports/API, and atomically replaces
-`ui/.revisions/current.json`. Source edits alone do not activate.
-
-Confirm activation in the running client's status row and
-`ui/.revisions/activation.json`: the acknowledgement must name the published file,
-the running client's PID, and status `committed`. Publication success alone does
-not confirm activation.
-
-The stable host retains its renderer, connection, history and interaction session
-across view replacement. Import/API rejection keeps the old view; a synchronous
-render failure restores the last committed view. Ctrl+R retries the publication;
-Ctrl+B restores the initial presentation locally without changing the pointer.
-Candidate modules must have no top-level side effects because imports cannot be
-rolled back. Pending sends are not replayed; late acceptance uses the shared session.
-
-Restart the client for dependency, native-renderer, host or state-schema changes,
-or to release accumulated module memory. A client predating the stable host needs
-one restart before live publication works. The Lisp server runs independently.
-Eight revision files are retained on disk, but Bun's ESM module cache cannot be
-unloaded; memory use across unlimited revisions is not bounded by disk retention.
-
-Set `SLOPCHAT_UI_REVISIONS=/absolute/path` for both client and publisher to use an
-isolated publication channel. Its pointer and acknowledgement live in that directory.
-
-For palette changes, read [THEME.md](THEME.md). For local checks, run
-`bun run --cwd ui typecheck` and `bun run --cwd ui test` from the repository root;
-the publisher also runs the smoke check.
+Run `bun run --cwd ui typecheck`, `bun run --cwd ui test`, and
+`bun ui/src/smoke.tsx` for local verification.
+For palette changes, read [THEME.md](THEME.md).
 
 ### Model selector
 
 Type `/models` and press Enter. Use arrows and Enter to select an account-advertised model; Esc cancels. Configured default resets the override. Selection is in-memory, applies to subsequent model responses (not an already-running provider request), and leaves the summary model unchanged. `/m` is now ambiguous; use `/ma` for map completion. Catalog source: Codex `model/list`, not a hard-coded list.
 
-Restart older clients: publishing cannot disable their host renderer automatic Ctrl+C exit. The Lisp server is unaffected.
+Restart older clients to load updated Ctrl+C handling. The Lisp server is unaffected.
 
 Esc cancels the active model response and round (without stopping the Lisp server or discarding queued inputs). In the model picker, Esc closes the picker. Cancellation is cooperative at host/tool boundaries; arbitrary blocking Lisp cannot be forcibly interrupted.
 
@@ -111,3 +90,25 @@ Ctrl+Y toggles application mouse reporting. When disabled, select with the termi
 Agent text previews arrive through Lisp status polling (500 ms). Transient text
 is capped at 16,000 characters and excluded from the journal and summary tree.
 Final replies replace previews; cancelled and failed previews are labelled.
+
+### Context inspector
+
+Use `/context` for session-only, immutable locally prepared requests (not hidden
+provider context). Up/Down selects historical calls; 1/2/3 shows raw payload,
+memory provenance and events; 4/5/6 shows captured instructions, tools and turn
+input. Left/Right pages; R refreshes the selected call; Esc returns to chat.
+Missing snapshots/fields and metrics remain unavailable, never reconstructed
+from current memory. Empty captured fields remain distinct from missing fields.
+Reads are cancellable and bounded to five seconds; return preserves composer
+state and history scroll. Cache percentages are not inferred.
+
+Reply and tool context links open the exact captured invocation. Up/Down
+continues across call-list pages; Ctrl+C and clipboard controls also work in
+this screen. Events distinguish preparation, completed local write, provider
+acknowledgement/rejection, and terminal outcome. Local write is not evidence
+of provider receipt.
+
+Large tool expressions retain a bounded preview in presentation metadata.
+Expand the card to read the canonical expression in 2,000-character pages;
+Left/Right changes pages and C copies the visible page. The full request
+remains lossless in the journal. Existing journals are bounded when read.

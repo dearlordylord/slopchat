@@ -110,10 +110,15 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
       (funcall slopchat-summary-function chat (slopchat-summary-key job) prompt
                (slopchat-summary-context job)
                (lambda (text error) (slopchat--summary-reply chat job text error)))
-    (slopchat-model-summary
-     (slopchat--connection chat) (slopchat-summary-thread job) prompt
-     (lambda (run) (slopchat--summary-reply chat job (slopchat-codex-result run)
-                                           (slopchat-run-error run))))))
+    (let* ((ledger (slopchat-memory-usage-ledger chat))
+           (attempt (gensym))
+           (slopchat-codex-memory-attempt
+            (list :memory-ledger ledger :memory-attempt attempt)))
+      (slopchat-memory-usage-start ledger attempt)
+      (slopchat-model-summary
+       (slopchat--connection chat) (slopchat-summary-thread job) prompt
+       (lambda (run) (slopchat--summary-reply chat job (slopchat-codex-result run)
+                                             (slopchat-run-error run)))))))
 
 (defun slopchat-schedule (chat)
   "Start ready queued nodes, never scan the tree for work."
@@ -179,9 +184,11 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
         (slopchat-dequeue (slopchat-chat-queued-input chat))
         (slopchat--start-input chat input)))))
 
+(defvar slopchat--presentation-call nil)
 (defun slopchat--tool (chat tool args)
   (slopchat--check-cancel)
-  (slopchat-log chat "tool" (json-serialize `(:name ,tool :input ,args)))
+  (let* ((call-id (format "call-%d" (slopchat-chat-count chat))) (parent slopchat--presentation-call) (slopchat--presentation-call call-id) (metadata `(:callId ,call-id ,@(when slopchat-log-context-id (list :contextId slopchat-log-context-id)) :name ,tool :expression ,(or (plist-get args :expression) "") ,@(when parent (list :parentCallId parent)))))
+  (slopchat-log chat "tool" (json-serialize `(:name ,tool :input ,args)) (append metadata (list :state "running")))
   (let* (failure (text (condition-case err
                   (pcase tool
                     ("emacs_eval" (prin1-to-string (eval (read (plist-get args :expression)) t)))
@@ -192,8 +199,8 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
                 (error (setq failure t) (concat "ERROR: " (error-message-string err))))))
     (slopchat--check-cancel)
     (setq text (slopchat-clip text))
-    (slopchat-log chat "echo" text)
-    (if failure (error "%s" text) text)))
+    (slopchat-log chat "echo" text (append metadata (list :state (if failure "error" "completed"))))
+    (if failure (error "%s" text) text))))
 (defvar slopchat--rounds (make-hash-table :test #'eq))
 (defvar slopchat--round-token nil)
 (defun slopchat--check-cancel ()
@@ -236,7 +243,8 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
             (funcall (slopchat-input-callback input) nil "Round cancelled")))
       (remhash chat slopchat--rounds))))
 (defun slopchat--start-input-body (chat input)
-  (let* ((prefix (slopchat--prefix chat (slopchat-chat-view chat) (slopchat-input-first input)))
+  (let* ((slopchat-log-context-id nil)
+         (prefix (slopchat--prefix chat (slopchat-chat-view chat) (slopchat-input-first input)))
          (prompt (concat (slopchat-render chat prefix) "\n\n" (slopchat-input-text input))))
     (setf (slopchat-chat-run chat) 'starting)
     (condition-case err
@@ -251,6 +259,11 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
           (let* ((connection (slopchat--connection chat))
                  (slopchat-current-chat chat)
                  (slopchat--ouro-updates nil)
+                 (slopchat-model-context-store (slopchat-chat-context chat))
+                 (slopchat-model-context-provenance
+                  (list :memory-text (slopchat-render chat prefix)
+                        :memory-prefix (slopchat-context-copy prefix)
+                        :input-first (slopchat-input-first input)))
                  (agent-eval-function
                   (lambda (expression) (slopchat--tool chat "emacs_eval" `(:expression ,expression))))
                  (agent-model-function
@@ -273,7 +286,8 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
                                  "\nYour only provider tool is eval. Memory is available as Lisp (zoom ID N PAGE) and (date ID).\n")
                          messages slopchat-turn-model
                          (lambda (run)
-                           (setq slopchat-last-thread (slopchat-run-thread run))
+                           (setq slopchat-last-thread (slopchat-run-thread run)
+                                 slopchat-log-context-id (slopchat-run-context-id run))
                            (setf (slopchat-chat-run chat) run))
                          (lambda () (slopchat-pump chat 0.05))
                          (let ((token slopchat--round-token))

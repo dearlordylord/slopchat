@@ -1,5 +1,8 @@
 ;;; slopchat-model.el --- One response, no agent loop -*- lexical-binding: t -*-
 (require 'slopchat-codex)
+(require 'slopchat-context)
+(defvar slopchat-model-context-store nil)
+(defvar slopchat-model-context-provenance nil)
 (defvar slopchat-model--connection nil)
 (defconst slopchat-model-eval-tools
   [(:type "function" :name "eval"
@@ -10,22 +13,51 @@
   "Return Ouro content blocks for MESSAGES without executing requested tools.
 App Server is interrupted at the first tool boundary. Each response uses a
 fresh thread; continuation history is supplied explicitly by the Lisp agent."
-  (let* ((thread (slopchat-codex-thread
+  (let* ((snapshot nil)
+         (requests nil)
+         (outcome 'failed)
+         (slopchat-codex-request-observer
+          (when slopchat-model-context-store
+            (lambda (method params)
+              (when (member method '("thread/start" "turn/start"))
+                (push (slopchat-context-copy (list :method method :params params)) requests)
+                (when (equal method "turn/start")
+                  (setq snapshot
+                        (slopchat-context-capture slopchat-model-context-store
+                                                  (reverse requests)
+                                                  slopchat-model-context-provenance))
+                  (slopchat-context-event slopchat-model-context-store snapshot
+                                          (list :kind 'submission :state 'prepared :prepared-at (float-time)))
+                  (let ((prepared-run (gethash (plist-get params :threadId)
+                                              (slopchat-connection-runs connection))))
+                    (when prepared-run
+                      (setf (slopchat-run-context-store prepared-run) slopchat-model-context-store
+                            (slopchat-run-context-id prepared-run) snapshot))))))))
+         (thread (condition-case err (slopchat-codex-thread
                   connection directory
                   (concat instructions "\nYou are a model adapter for an external Lisp agent.\n"
                           "Continue the supplied conversation; its tool_result blocks are actual host results.\n"
                           "Request eval when needed. Do not implement an internal tool loop.\n")
-                  slopchat-model-eval-tools model))
+                  slopchat-model-eval-tools model)
+                   (error
+                    ;; Preserve only requests actually prepared before rejection.
+                    (when (and slopchat-model-context-store requests)
+                      (let ((id (slopchat-context-capture slopchat-model-context-store
+                                   (reverse requests) slopchat-model-context-provenance)))
+                        (slopchat-context-finish slopchat-model-context-store id 'failed)))
+                    (signal (car err) (cdr err)))))
          (run (slopchat-codex-run connection thread
                                      (concat "Conversation (Emacs Lisp data):\n" (prin1-to-string messages))
                                      nil on-event nil 'model))
          content)
-    (setf (slopchat-run-deferred run) t)
+    (setf (slopchat-run-deferred run) t
+          (slopchat-run-context-store run) slopchat-model-context-store
+          (slopchat-run-context-id run) snapshot)
     (unwind-protect
         (progn
           (when on-run (funcall on-run run))
           (while (and (not (slopchat-run-done run)) (null (slopchat-run-requests run)))
-            (if pump (funcall pump) (slopchat-codex-pump connection 0.05)))
+            (let ((slopchat-codex-request-observer nil)) (if pump (funcall pump) (slopchat-codex-pump connection 0.05))))
           (when (and (slopchat-run-requests run) (slopchat-run-turn run))
             (slopchat-codex-rpc connection "turn/interrupt"
                                 `(:threadId ,thread :turnId ,(slopchat-run-turn run)))
@@ -43,6 +75,7 @@ fresh thread; continuation history is supplied explicitly by the Lisp agent."
                     content)))
           (when (and (null (slopchat-run-requests run)) (slopchat-run-error run))
             (error "%s" (slopchat-run-error run)))
+          (setq outcome (if (slopchat-run-requests run) 'tool-boundary 'completed))
           (nreverse content))
       (unless (slopchat-run-done run)
         ;; Cancellation ends the provider's loop before host evaluation begins.
@@ -50,6 +83,12 @@ fresh thread; continuation history is supplied explicitly by the Lisp agent."
           (ignore-errors (slopchat-codex-rpc connection "turn/interrupt"
                                            `(:threadId ,thread :turnId ,(slopchat-run-turn run)))))
         (slopchat-codex--finish run))
+      (when snapshot
+        (slopchat-context-finish
+         slopchat-model-context-store snapshot
+         (if (and (boundp 'slopchat--round-token)
+                  slopchat--round-token (car slopchat--round-token))
+             'cancelled outcome)))
       (slopchat-codex-forget-thread connection thread))))
 (defun slopchat-model-summary (connection thread prompt callback)
   "Start one tool-free summary response; retry policy belongs to memory."

@@ -37,4 +37,4 @@ SLOPCHAT - tick 24 - messages 0 - summaries 0
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 Failed; draft retained. Outcome may be unknown: TransportError: connect ENOENT /tmp/absent-ui-test.sock                 
 Hello 🌍                                                                                                                
-Enter send - Ctrl+Enter newline - Tab queue - Ctrl+F focus - /map /chat - Tab complete - Ctrl+O map - Ctrl+C clear /    
+Enter send - Ctrl+Enter newline - Tab queue / focus - Ctrl+F focus - /map /chat - Tab complete - Ctrl+O map - Ctrl+C    

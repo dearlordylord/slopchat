@@ -2,8 +2,22 @@
 (require 'cl-lib)
 (require 'json)
 (require 'subr-x)
+(require 'slopchat-context)
 
 (defvar slopchat-message-bytes 30000)
+(defvar slopchat-log-context-id nil
+  "Exact model invocation responsible for the current presentation.")
+(defun slopchat-bounded-presentation (presentation first parts)
+  "Keep a bounded expression preview and a reference to the canonical request."
+  (when presentation
+    (let* ((copy (copy-sequence presentation))
+           (expression (plist-get copy :expression)))
+      (when (stringp expression)
+        (setq copy (plist-put copy :expression (substring expression 0 (min 2000 (length expression)))))
+        (when (> (length expression) 2000)
+          (setq copy (plist-put copy :expressionTruncated t))))
+      (setq copy (plist-put copy :requestFirst (or (plist-get copy :requestFirst) first)))
+      (plist-put copy :requestParts (or (plist-get copy :requestParts) parts)))))
 (defvar slopchat-view-high 128000)
 (defvar slopchat-view-low 64000)
 (defvar slopchat-compaction-high 32000)
@@ -29,6 +43,15 @@
   directory lock (count 0) messages nodes (cursor 0) view comp-view
   batching comp-batching jobs leaves (leaf-slots 0) states failed (active 0) transport run queued-input
   agent closed stream)
+
+;; Keep live chat identities and their existing struct layout during hot reload.
+(defvar slopchat--context-stores (make-hash-table :test #'eq :weakness 'key))
+(defun slopchat-chat-context (chat)
+  (or (gethash chat slopchat--context-stores)
+      (unless (slopchat-chat-closed chat)
+        (puthash chat (slopchat-context-store-create) slopchat--context-stores))))
+(gv-define-setter slopchat-chat-context (value chat)
+  `(puthash ,chat ,value slopchat--context-stores))
 
 (defun slopchat-bytes (text) (length (encode-coding-string text 'utf-8-unix)))
 (defun slopchat-split (text limit)
@@ -237,7 +260,7 @@ Compare integer cross-products; TOTAL is the number of logged messages."
       (slopchat--offer chat (list (1+ (car key)) (/ (cadr key) 2)))
       (slopchat--publish chat)))
   (slopchat-node chat key))
-(defun slopchat-log (chat kind text)
+(defun slopchat-log (chat kind text &optional presentation)
   "Append TEXT losslessly (except clipped echo), returning its message IDs."
   (when (slopchat-chat-closed chat) (error "Chat is closed"))
   ;; Emacs json-serialize returns unibyte UTF-8. Decode before nesting that
@@ -248,10 +271,15 @@ Compare integer cross-products; TOTAL is the number of logged messages."
     (error "Unknown message kind: %s" kind))
   (let ((parts (if (equal kind "echo") (list (slopchat-clip text))
                  (slopchat-split text slopchat-message-bytes))) ids)
+    (setq presentation (slopchat-bounded-presentation presentation
+                                                       (slopchat-chat-count chat) (length parts)))
     (dolist (part parts)
       (let* ((id (slopchat-chat-count chat))
              (date (format-time-string "%Y-%m-%dT%H:%M:%S.%3NZ" nil t))
-             (message `(:i ,id :kind ,kind :text ,part :size ,(slopchat-bytes part) :date ,date))
+             (message `(:i ,id :kind ,kind :text ,part :size ,(slopchat-bytes part) :date ,date
+                         ,@(when (or (plist-get presentation :contextId) slopchat-log-context-id)
+                             (list :contextId (or (plist-get presentation :contextId) slopchat-log-context-id)))
+                         ,@(when presentation (list :tool presentation))))
              (file (expand-file-name (concat "main/" (substring date 0 10) ".jsonl")
                                      (slopchat-chat-directory chat))))
         (slopchat--write file (concat (json-serialize message) "\n") t)
@@ -346,7 +374,8 @@ Compare integer cross-products; TOTAL is the number of logged messages."
             (accept-process-output lock 0.05)))
         (when (process-live-p lock) (delete-process lock)))
       (when (buffer-live-p (process-buffer lock)) (kill-buffer (process-buffer lock)))))
-  (setf (slopchat-chat-closed chat) t))
+  (setf (slopchat-chat-closed chat) t
+        (slopchat-chat-context chat) nil))
 
 (defun slopchat-zoom (chat id span &optional page)
   (unless (and (natnump id) (integerp span) (> span 0) (= (logand span (1- span)) 0)

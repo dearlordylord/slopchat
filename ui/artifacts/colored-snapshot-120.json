@@ -3903,7 +3903,7 @@
     {
       "spans": [
         {
-          "text": "Enter send - Ctrl+Enter newline - Tab queue - Ctrl+F focus - /map /chat - Tab complete - Ctrl+O map - Ctrl+C clear / ",
+          "text": "Enter send - Ctrl+Enter newline - Tab queue / focus - Ctrl+F focus - /map /chat - Tab complete - Ctrl+O map - Ctrl+C ",
           "fg": {
             "buffer": {
               "0": 128,

@@ -19,3 +19,18 @@ Recommendations, not implemented changes:
 2. Preserve canonical memory text. Add optional presentation metadata: stable `callId`, `parentCallId` for nested evaluations, tool name, expression, lifecycle status, start/end timestamps and explicit error. Associate output chunks with `callId`; retain chunk ordering if logging splits large messages. Do not pair adjacent tool/result rows: nested evaluations make adjacency ambiguous.
 3. Make collapsed previews reversible: indicate hidden content, provide full detail scrolling and separate copy-code/copy-result actions. Do not use a display limit as the stored-content limit. Avoid opening/collapsing a card after a text-selection gesture.
 4. Add shell/read/diff specialization only when execution emits real operation metadata (command/workdir/exit, file/range, or before/after/patch). Arbitrary Lisp can perform several operations; guessing these from expression or result text would misrepresent execution. Optional structured child-operation events can later provide an `execute`-style view without changing the model-facing tool API.
+
+## Initial SlopChat implementation
+
+Assistant history uses OpenTUI Markdown. Tool records optionally carry callId,
+parentCallId, name, expression and state; canonical text remains unchanged.
+Cards join only explicit IDs and keep legacy records literal. Click a card to
+focus and expand it; Enter toggles, c copies expression and r copies result.
+Errors retain a visible first line; expanded results remain literal text.
+
+Still pending: keyboard-only card navigation, timestamps, chunk aggregation,
+cancellation lifecycle, Lisp highlighting, and Markdown streaming previews.
+History currently enables Markdown streaming previews to avoid blank text while
+asynchronous highlighting initializes; correct finalization needs further work.
+
+Echo entries remain separate and visible. Known process envelopes show literal output with status, exit code, and dropped-character count; Raw details preserves the original representation. Unknown results stay literal, without language guessing. Call cards show the call ID and a contrasting Details control, and no longer duplicate result bodies. Canonical journal records are unchanged.

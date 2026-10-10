@@ -51,7 +51,17 @@ def serve(directory, adopt=None):
                 while not stopping and not select.select([fd], [], [], .25)[0]:
                     pass
                 if stopping:
-                    signal.pidfd_send_signal(fd, signal.SIGTERM)
+                    try:
+                        signal.pidfd_send_signal(fd, signal.SIGTERM)
+                    except ProcessLookupError:
+                        pass
+                    if not select.select([fd], [], [], 10)[0]:
+                        try:
+                            signal.pidfd_send_signal(fd, signal.SIGKILL)
+                        except ProcessLookupError:
+                            pass
+                        select.select([fd], [], [])
+                    record('adopted-stopped', pid=adopt, requested=True)
                     return
                 record('adopted-exit', pid=adopt, reason='exit status unavailable for a non-child')
             finally:
@@ -65,7 +75,9 @@ def serve(directory, adopt=None):
                 child = subprocess.Popen([
                     os.environ.get('SLOPCHAT_EMACS', 'emacs'), '--batch', '-Q', '-L', str(ROOT / 'lisp'),
                     '-l', 'slopchat-cli', '--eval', '(slopchat-serve ' + json.dumps(str(directory)) + ')'
-                ], cwd=ROOT, stdin=subprocess.DEVNULL, stdout=output, stderr=output, start_new_session=True)
+                ], cwd=ROOT, stdin=subprocess.DEVNULL, stdout=output, stderr=output, start_new_session=True,
+                    # Cancelled UI reads must yield EPIPE, not kill Lisp.
+                    restore_signals=False)
                 (directory / 'server.pid').write_text(str(child.pid) + '\n')
                 record('started', pid=child.pid)
                 while child.poll() is None and not stopping:

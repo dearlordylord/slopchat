@@ -2180,7 +2180,7 @@
     {
       "spans": [
         {
-          "text": "Enter send - Ctrl+Enter newline - Tab queue - Ctrl+F focus -",
+          "text": "Enter send - Ctrl+Enter newline - Tab queue / focus - Ctrl+F",
           "fg": {
             "buffer": {
               "0": 128,

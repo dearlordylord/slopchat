@@ -7,12 +7,10 @@ export function copySelection(renderer: CliRenderer): boolean {
 
 // Command+C usually stays in the terminal. Copy on mouse release instead.
 export function installSelectionClipboard(renderer: CliRenderer): ()=>void {
- let timer:ReturnType<typeof setTimeout>|undefined;
- const selected=()=>{
-  if(timer)clearTimeout(timer);
-  // Selection is emitted before OpenTUI refreshes selected renderables.
-  timer=setTimeout(()=>{timer=undefined;if(!renderer.isDestroyed)copySelection(renderer)},0);
- };
+ let pending=false;
+ const copy=()=>{if(pending){pending=false;if(!renderer.isDestroyed)copySelection(renderer)}};
+ const selected=()=>{pending=true;renderer.requestRender()};
  renderer.on('selection',selected);
- return ()=>{renderer.off('selection',selected);if(timer)clearTimeout(timer)};
+ renderer.on('frame',copy);
+ return ()=>{renderer.off('selection',selected);renderer.off('frame',copy);pending=false};
 }

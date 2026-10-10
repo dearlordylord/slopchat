@@ -2,3 +2,4 @@
 .chats/
 *.elc
 __pycache__/
+ui/.manual-views/

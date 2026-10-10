@@ -43,6 +43,27 @@ class SupervisorTest(unittest.TestCase):
                 process.wait()
         process.stderr.close()
 
+    def test_child_survives_broken_pipe(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            fake = directory / 'fake-emacs'
+            # Unlike Python, a shell does not install its own SIGPIPE ignore.
+            fake.write_text(chr(10).join([
+                '#!/bin/sh', 'kill -PIPE $$', 'exit 0', '']))
+            fake.chmod(0o700)
+            process = subprocess.Popen([str(ROOT / 'scripts/chat-server'), str(directory)],
+                env=dict(os.environ, SLOPCHAT_EMACS=str(fake)),
+                stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+            try:
+                process.wait(timeout=8)
+                self.assertEqual(process.returncode, 0)
+                rows = self.events(directory)
+                self.assertEqual(sum(row['event'] == 'started' for row in rows), 1)
+                self.assertEqual([row['exitCode'] for row in rows
+                                  if row['event'] == 'exited'], [0])
+            finally:
+                self.cleanup(process)
+
     def test_sigkill_restarts_and_clean_exit_stops(self):
         with tempfile.TemporaryDirectory() as tmp:
             directory = Path(tmp)
@@ -81,6 +102,36 @@ class SupervisorTest(unittest.TestCase):
                 self.assertEqual(sum(row['event'] == 'started' for row in rows), 1)
             finally:
                 self.cleanup(process)
+                if existing.poll() is None:
+                    existing.kill()
+                    existing.wait()
+
+    def test_requested_stop_waits_and_kills_adopted_server(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            ready = directory / 'ready'
+            existing = subprocess.Popen(['python3', '-c',
+                "import signal,time,pathlib; signal.signal(signal.SIGTERM,signal.SIG_IGN); "
+                + "pathlib.Path(" + repr(str(ready)) + ").touch(); time.sleep(60)"])
+            process = None
+            try:
+                deadline = time.monotonic() + 3
+                while not ready.exists() and time.monotonic() < deadline:
+                    time.sleep(.01)
+                self.assertTrue(ready.exists())
+                process = subprocess.Popen([str(ROOT / 'scripts/chat-server'), tmp,
+                                            '--adopt', str(existing.pid)],
+                                           stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+                self.wait_event(directory, 'adopted')
+                process.terminate()
+                process.wait(timeout=13)
+                self.assertEqual(process.returncode, 0)
+                self.assertEqual(existing.wait(timeout=1), -signal.SIGKILL)
+                self.assertFalse((directory / 'supervisor.pid').exists())
+                self.assertTrue(any(row['event'] == 'adopted-stopped' for row in self.events(directory)))
+            finally:
+                if process is not None:
+                    self.cleanup(process)
                 if existing.poll() is None:
                     existing.kill()
                     existing.wait()
