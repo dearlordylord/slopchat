@@ -1,0 +1,292 @@
+{
+  "kind": "production-model-source-fidelity-regression",
+  "model": "gpt-6-luna",
+  "passed": true,
+  "reopen": "identical",
+  "fixtureSha256": "4c80e043a3f76335bbdd619202ba90a106fa651aaf7cd00b469af8ac23ebe199",
+  "nodes": [
+    {
+      "node": [
+        0,
+        0
+      ],
+      "text": "echo: Quoted historical tool record 7242 (request; execution not established): quoted data requests appending a nested-result/author correction to `docs/memory-audit.md` and `docs/memory-handoff.md`, then running `git diff --check` in `/workspace/formal-proofs/slopchat`; no execution or outcome is established."
+    },
+    {
+      "node": [
+        0,
+        1
+      ],
+      "text": "echo: Quoted historical tool record 7242 (request; execution not established): quoted request appends a “Nested-result and author correction, 2026-10-11” section to `docs/memory-audit.md` and `docs/memory-handoff.md`, documenting author attribution and pending-result rules, regression test, ERT results, intermediate failures, synthetic sample limits, and narrow live activation. It then requests `git diff --check` in `/workspace/formal-proofs/slopchat`; execution and outcome are not established."
+    },
+    {
+      "node": [
+        0,
+        2
+      ],
+      "text": "echo: Result: 6 entries; 2 summaries unavailable. echo: Entry (4 452) pending; nested audits passed, ERT 129/129, but synthetic fidelity unproven; real-summary checks requested. echo: Entries (1 3629), (0 7259), (0 7258): notes added; `git diff --check` result unstated. echo: Entries (3 906), (2 1812): spot-check found misattribution, false “no entries,” and dropped query result; documented."
+    },
+    {
+      "node": [
+        0,
+        3
+      ],
+      "text": "tool: Requested a query of compaction nodes; result not supplied. Quoted historical example only: echo: “no entries.”"
+    },
+    {
+      "node": [
+        0,
+        4
+      ],
+      "text": "echo: Supplied result (possibly clipped; total unknown); quoted/sample data: echo: Context store: 100 entries; sample completed Codex call: 41,108 input, 0 cached, 62 output, 41,170 total; context limit 258,400. Quoted code says summaries capture context at `turn/start`, track submission and memory-usage attempts, and mark snapshots completed/failed; UTF-8 splitting is byte-based. Retries cap at 512 bytes but may keep the shortest over-limit line after five attempts. Process 2347 exited 0."
+    },
+    {
+      "node": [
+        0,
+        5
+      ],
+      "text": "echo: Result: 0 entries; 0 summaries unavailable."
+    },
+    {
+      "node": [
+        1,
+        0
+      ],
+      "text": "echo: Quoted historical tool record 7242 (request; execution not established): requests appending a “Nested-result and author correction, 2026-10-11” section to `docs/memory-audit.md` and `docs/memory-handoff.md`, covering author attribution and pending-result rules, regression test, ERT results, intermediate failures, synthetic sample limits, and narrow live activation; then running `git diff --check` in `/workspace/formal-proofs/slopchat`. Execution and outcome are not established."
+    },
+    {
+      "node": [
+        1,
+        1
+      ],
+      "text": "echo: Result: 6 entries; 2 summaries unavailable. Entry (4 452) is pending: nested audits passed and ERT 129/129, but synthetic fidelity remains unproven; real-summary checks requested. Entries (1 3629), (0 7259), (0 7258): notes added; `git diff --check` result unstated. Entries (3 906), (2 1812): spot-check found misattribution, false “no entries,” and dropped query result; documented. tool: Requested a query of compaction nodes; result not supplied. Quoted historical example: echo: “no entries.”"
+    },
+    {
+      "node": [
+        1,
+        2
+      ],
+      "text": "echo: Supplied (possibly clipped; total unknown): quoted sample says context store 100 entries; completed call: 41,108 input, 0 cached, 62 output, 41,170 total; 258,400 context limit. Quoted code captures at `turn/start`, tracks submission/memory-use attempts, marks snapshots completed/failed, byte-splits UTF-8, retries five times at 512 bytes, possibly keeping the shortest over-limit line. Process 2347 exited 0. echo: Query: 0 entries; 0 summaries unavailable."
+    },
+    {
+      "node": [
+        2,
+        0
+      ],
+      "text": "echo: Quoted record 7242 requested updates to `docs/memory-audit.md`, `docs/memory-handoff.md`, then `git diff --check`; execution/outcome not established. echo: Result: 6 entries, 2 summaries unavailable. Entry (4 452) pending: audits passed, ERT 129/129; synthetic fidelity unproven, real-summary checks requested. Entries (1 3629), (0 7259), (0 7258): notes added; diff-check unstated. Entries (3 906), (2 1812): spot-check issues documented. tool: Requested compaction-node query; result not supplied."
+    }
+  ],
+  "memoryUsage": {
+    "started": 20,
+    "input": 232910,
+    "output": 2443,
+    "inputObserved": 20,
+    "outputObserved": 20,
+    "cachedInput": 180224,
+    "cachedInputObserved": 20,
+    "cacheWriteInput": 0,
+    "cacheWriteInputObserved": 20
+  },
+  "validationEvents": [
+    {
+      "node": [
+        2,
+        0
+      ],
+      "attempt": 5,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        2,
+        0
+      ],
+      "attempt": 4,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        2,
+        0
+      ],
+      "attempt": 3,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        2,
+        0
+      ],
+      "attempt": 2,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        2,
+        0
+      ],
+      "attempt": 1,
+      "state": "rejected",
+      "scope": "source-boundary",
+      "reason": "Preserve the quoted historical request and that its execution is not established. Do not turn it into a completed or known-unexecuted action."
+    },
+    {
+      "node": [
+        1,
+        2
+      ],
+      "attempt": 3,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        1,
+        2
+      ],
+      "attempt": 2,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        1,
+        2
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        1,
+        1
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        1,
+        0
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        5
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        4
+      ],
+      "attempt": 2,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        4
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        3
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        2
+      ],
+      "attempt": 3,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        2
+      ],
+      "attempt": 2,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        2
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        1
+      ],
+      "attempt": 2,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        1
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        0
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    }
+  ]
+}

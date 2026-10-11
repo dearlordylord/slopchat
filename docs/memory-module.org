@@ -1,0 +1,209 @@
+#+title: Standalone memory interface
+
+The memory implementation is a four-file Emacs Lisp module:
+=lisp/memory.el=, =lisp/memory-store.el=, =lisp/memory-context.el= and
+=lisp/memory-usage.el=. Copy these files together into a load-path directory.
+The module does not load SlopChat, Ouro, Codex, the UI or any model connection.
+It requires Emacs 29.1+ (tested on 30.2), Linux =flock= and =truncate= for the
+existing storage/lock recovery implementation. No external storage backend is
+promised by this first interface.
+
+=UNIICHAT.md= governs the journal, binary tree, merge order, saved views and
+compaction scheduling. =memory-ux-spec.md= governs truthful observability.
+Application policy preserves the existing source-fidelity fixes. Extraction
+changes ownership and the interface; it does not change the persisted format,
+message IDs, short-source behavior or the two batching algorithms.
+
+* Public operations
+
+#+begin_src elisp
+(require 'memory)
+(memory-open directory :backend backend :policy policy) ; opaque handle
+(memory-append memory record)                            ; durable receipt
+(memory-snapshot memory :before id :view 'main)          ; copied context
+(memory-zoom memory first span :page page)               ; copied source page
+(memory-date memory id)
+(memory-inspect memory query)                            ; bounded copied data
+(memory-subscribe memory listener)                       ; unsubscribe function
+(memory-step memory)                                    ; no waiting for I/O
+(memory-close memory)
+#+end_src
+
+The handle is private. Applications must not use =memory--*= functions,
+structure accessors, hash tables or queues. All returned containers and strings
+are owned copies. Reading and zooming do not change the agent's context.
+
+Open acquires exclusive ownership of the directory. Close is idempotent:
+prevent new work, cancel unfinished attempts, release backend job resources and
+the lock. Late completion cannot publish a node. Close never closes a shared
+provider transport. Completed journal/tree/checkpoint writes remain durable;
+unfinished work can resume after reopen. Diagnostics and accounting are
+session-only; old exact call links return unavailable after reopen.
+
+* Records and turn boundaries
+
+=memory-append= accepts a plist with =:kind= and =:text=. Optional
+=:presentation= and =:context-id= preserve application metadata in the existing
+journal format. Kind is a nonempty string, optionally restricted by policy.
+The receipt contains =:first-id=, =:ids= and =:end-exclusive=. Long text can
+produce several records; result clipping and UTF-8 splitting retain the
+existing policy.
+
+The application durably appends the input, saves its receipt with the queued
+turn, and prepares the snapshot at the actual launch:
+
+#+begin_src elisp
+(let* ((receipt (memory-append memory (list :kind "user" :text input)))
+       (first (plist-get receipt :first-id)))
+  ;; Keep FIRST with the application's queued input.
+  (memory-snapshot memory :before first))
+#+end_src
+
+=:before= is exclusive. The new input goes after the returned context, exactly
+once. This preserves the existing durable acceptance/steering order while
+implementing the specification's exclusion of the new message from memory.
+
+A snapshot has =:state= (=ready=, =pending= or =failed=), =:before=,
+=:covered-through= (exclusive contiguous coverage), =:view=, =:failed= and,
+only when ready, =:text= and UTF-8 =:bytes=. Pending/failed snapshots have no
+usable prompt text. There are no placeholders, partial input or blocking waits.
+=:view= is =main= or =compaction=; the summarizer separately receives the
+existing bounded compaction prefix ending at its node or first unbuilt record.
+
+* Backend contract
+
+The backend is a plist:
+
+#+begin_src elisp
+(list :start start-function
+      :release release-job-function
+      :late-usage t) ; only when terminal attempts have bounded late routes
+#+end_src
+
+=start-function= receives =(request emit done)= and returns an optional
+idempotent cancellation function. It starts one attempt, not an entire retry
+loop. Synchronous callbacks are supported. =done= accepts either
+=(:text STRING)= or =(:error (:kind SYMBOL :message STRING))=. For example,
+=forbidden-tool= requests the existing data-only correction; provider strings
+are mapped to that typed error by the adapter. Repeated completions are ignored.
+Malformed results and policy exceptions fail closed.
+
+Request fields include =:job-id=, =:attempt-id=, =:attempt=, =:node=,
+=:source=, =:context=, =:context-view=, =:prompt= and =:prior-turns=.
+Job identity stays stable across its attempts. A new job has independent source
+and provider conversation. The adapter owns threads, model configuration,
+shared instructions/tools, cache anchors and transport resources. It releases
+the conversation when =release-job-function= receives the final job ID.
+
+Memory owns concurrency/admission, retries, normalization/validation, valid
+shortest-candidate selection, immutable node commit and publication. The
+existing maximum is eight concurrent jobs and five attempts per job. A valid
+shortest response can remain over 512 bytes after exhaustion, as before. A
+failed node is retried on the next append. Queues maintain constant-time counts;
+scheduling never scans the tree for work.
+
+=emit= accepts copied observation plists:
+
+- Submission: =:kind submission=, =:state prepared/sent/acknowledged/rejected=.
+  A prepared event may provide =:payload= (exact assembled local request) and
+  adapter =:provenance=. Payload is captured once and cannot be replaced;
+  authoritative source/node identity cannot be overwritten by adapter metadata.
+  Payload has one home in the snapshot, not another copy in ordinary events.
+- Usage: =:kind usage=, =:scope attempt/cumulative=, =:counters= containing
+  explicitly observed =:input=, =:output=, =:cached-input= and
+  =:cache-write-input=. Cumulative observations require =:stream-id= and use
+  high-water accounting across retries. Optional =:source=, =:received-at=,
+  =:reported= and =:metrics= preserve measurement provenance.
+- Retirement: =:kind retired= releases the late-update route for that attempt
+  without subtracting accumulated expenditure. Late-capable adapters must bound
+  and retire their routes. The Codex adapter keeps the existing 30-second/100
+  route policy. Backends without late usage retire terminal attempt accounting
+  automatically.
+- Other diagnostic observations, including tool rejection and cache routing,
+  remain associated with the job and attempt.
+
+* Inspection and subscriptions
+
+=memory-inspect= accepts a kind symbol or =(:kind KIND ...)=:
+
+- =status=: count/cursor, active jobs, failed node keys, queued/waiting counts,
+  current context bytes, view count, closure and notification sequence.
+- =usage=: session subtotals with separate per-counter reporting coverage.
+- =nodes=: a page of the published main view; =node= addresses one tree range
+  with =:id= and =:n= (aligned power-of-two span), including nodes outside it.
+- =record= (= :id=), =records= (= :after/:before/:limit=): canonical records.
+- =jobs=: failed/queued/active metadata.
+- =attempts=: =:total/:offset/:entries=; metadata by default, full retained
+  entries with =:details t=. =:id= anchors a page. Full entries include local
+  request/source/context, original result/error, provider payload if available,
+  normalization, validation and submission/usage events.
+- =attempt-detail= (= :id=): a retained exact entry or =(:available nil)=.
+
+Pages accept nonnegative =:offset= and =:limit= and cap at 100 entries. Details
+share the session snapshot pool: active entries plus the newest terminal calls,
+currently 100 terminal entries / 32 MiB. Active input is not truncated. These
+limits are policy, not promises of durable history. Eviction does not reset the
+usage ledger. Missing counters differ from reported zero. Thread totals are not
+precise per-attempt spend, and provider tokens are not billed money or known
+cached tree nodes.
+
+=memory-subscribe= delivers ordered copied notifications after committed
+operations: record append, job/attempt start, provider observations, validation,
+node build, view publication, final job outcome and close. Building a node and
+including it in a view are distinct. Each notification carries local sequence
+and time. Listener failure cannot fail a journal write. Notifications are not a
+durable event log; restore current truth through inspection after reconnect.
+
+An additional adapter ingress, =memory-observe memory observation=, lets normal
+application calls share this same bounded pool with compactions:
+=prepared= (= :payload/:provenance=) returns a call ID; =event=
+(= :id/:event=) appends evidence; =finished= (= :id/:outcome=) terminates it.
+It never drives inference, changes context or adds turn usage to compaction
+expenditure. This keeps the existing per-chat shared retention budget and exact
+turn inspector without exposing the snapshot store to the application.
+
+* Application integration
+
+=slopchat-chat= contains a memory handle alongside host directory, transport,
+turn, input queue, agent, closure and stream. It contains no tree/view/job or
+accounting fields. SlopChat and its UI read memory only through the public API.
+The host calls =memory-step= before/after its existing transport pump; memory
+never pumps the transport, starts an ordinary reply or steers a user turn.
+
+=slopchat-memory-backend.el= owns Codex conversations/cache routing and maps
+provider observations into =emit=. =slopchat-memory-policy.el= supplies the
+unchanged application task prompt, author/result boundary checks and optional
+presentation handling. Shared provider prefix and cache configuration remain
+unchanged. Application kinds and nested query-result recognition are not
+mandatory schemas of the generic module.
+
+=tests/slopchat-memory-compat.el= contains white-box aliases solely for the old
+structural regressions. It is never loaded by the application. The boundary
+test rejects private memory access and the former chat memory accessors in
+production callers. These aliases are not an exported compatibility API.
+
+The running main server is not hot-reloaded into a different structure layout.
+This extraction is used by a fresh application process. Isolated socket and
+production-model runs exercise it without changing the canonical main chat.
+
+* Reproduction
+
+#+begin_src sh
+emacs --batch -Q -L lisp -l tests/memory-test.el -f ert-run-tests-batch-and-exit
+emacs --batch -Q -l scripts/memory-module-package-check.el
+python3 scripts/memory-module-cli-smoke.py
+
+# Compare to the fixed pre-extraction commit, with deterministic fake inference.
+git show 26880f3:lisp/slopchat-store.el > /tmp/memory-module-legacy-store.el
+MEMORY_LEGACY_STORE=/tmp/memory-module-legacy-store.el emacs --batch -Q -L lisp -l scripts/memory-module-compatibility.el
+
+# Opt-in: real inference in an isolated temporary chat; exports a separate report.
+SLOPCHAT_FIDELITY_EVIDENCE=/tmp/memory-module-provider-evidence.json emacs --batch -Q -L lisp -l scripts/memory-fidelity-smoke.el
+#+end_src
+
+Evidence: =memory-module-evidence.json=. The comparison checks every main and
+compaction view after all 1024 appends, all 2047 nodes, actual default batching
+and identical reopen. Production replay retains six leaves/four parents and
+reported cache/usage coverage. Structural validation does not prove arbitrary
+semantic fidelity. Publishing a separate repository/package is outside this
+internal extraction.

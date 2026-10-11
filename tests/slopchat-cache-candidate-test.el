@@ -1,5 +1,7 @@
 ;;; slopchat-cache-candidate-test.el --- Empty-fork contract checks -*- lexical-binding: t -*-
 (require 'ert)
+(add-to-list 'load-path (file-name-directory (or load-file-name buffer-file-name)))
+(require 'slopchat-memory-compat)
 (add-to-list 'load-path (expand-file-name "../lisp" (file-name-directory load-file-name)))
 (require 'slopchat-cache-candidate)
 (require 'slopchat-model)

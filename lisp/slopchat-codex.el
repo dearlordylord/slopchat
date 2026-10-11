@@ -3,8 +3,7 @@
 (require 'json)
 (require 'subr-x)
 (require 'slopchat-context)
-(require 'slopchat-memory-usage)
-(defvar slopchat-codex-memory-attempt nil)
+(defvar slopchat-codex-observation-route nil)
 
 (defvar slopchat-codex-request-observer nil
   "Optional observer of locally prepared RPC payloads before submission.")
@@ -58,19 +57,20 @@
           (let ((run (and (equal method "turn/start")
                           (gethash (plist-get params :threadId) (slopchat-connection-runs connection)))))
             (slopchat-codex-send connection `(:id ,id :method ,method :params ,params))
-            (when (and run (slopchat-run-context-store run))
-              (slopchat-context-event (slopchat-run-context-store run) (slopchat-run-context-id run)
-                                      (list :kind 'submission :state 'sent :sent-at (float-time))))))
+            (when run (slopchat-codex--observe run (list :kind 'submission :state 'sent :sent-at (float-time))))))
       (error
        (remhash id (slopchat-connection-callbacks connection))
        (signal (car err) (cdr err))))))
 (defun slopchat-codex-forget-thread (connection thread)
   (when (process-live-p (slopchat-connection-process connection))
     (slopchat-codex-async connection "thread/unsubscribe" `(:threadId ,thread))))
+(defun slopchat-codex--observe (run event)
+  (when (slopchat-run-context-store run)
+    (slopchat-context-event (slopchat-run-context-store run) (slopchat-run-context-id run) event))
+  (when-let ((emit (plist-get (gethash run slopchat-codex--context-metadata) :emit)))
+    (funcall emit event)))
 (defun slopchat-codex--retire-memory-route (route)
-  (when (plist-get route :memory-ledger)
-    (slopchat-memory-usage-retire (plist-get route :memory-ledger)
-                                 (plist-get route :memory-attempt))))
+  (when-let ((emit (plist-get route :emit))) (funcall emit '(:kind retired))))
 (defun slopchat-codex--prune-observations (connection)
   "Bound late routes even when no usage notification arrives."
   (let ((routes (slopchat-connection-observations connection))
@@ -89,7 +89,7 @@
   (unless (slopchat-run-done run)
     (setf (slopchat-run-done run) t (slopchat-run-error run) error)
     (let ((metadata (gethash run slopchat-codex--context-metadata)))
-      (when (or (slopchat-run-context-id run) (plist-get metadata :memory-ledger))
+      (when (or (slopchat-run-context-id run) (plist-get metadata :emit))
         (slopchat-codex--retire-memory-route
          (gethash (list (slopchat-run-thread run) (slopchat-run-turn run))
                   (slopchat-connection-observations (slopchat-run-connection run))))
@@ -141,14 +141,13 @@
            (id (if run (slopchat-run-context-id run) (plist-get route :id)))
            (turn (if run (slopchat-run-turn run) (plist-get route :turn))))
       (let* ((metadata (if run (gethash run slopchat-codex--context-metadata) route))
-             (ledger (plist-get metadata :memory-ledger))
-             (attempt (plist-get metadata :memory-attempt)))
-        (when (and ledger attempt turn (equal turn (plist-get params :turnId)))
-          (let ((metrics (slopchat-codex--normalize-usage (plist-get params :tokenUsage)))
-                (state (plist-get metadata :memory-thread-state)))
-            (if state
-                (slopchat-memory-usage-observe-total ledger attempt state (plist-get metrics :total))
-              (slopchat-memory-usage-observe ledger attempt (plist-get metrics :last))))))
+             (emit (plist-get metadata :emit)))
+        (when (and emit turn (equal turn (plist-get params :turnId)))
+          (let ((metrics (slopchat-codex--normalize-usage (plist-get params :tokenUsage))))
+            (funcall emit (list :kind 'usage :source 'codex :received-at now
+                                :scope 'cumulative :stream-id (plist-get params :threadId)
+                                :reported (plist-get params :tokenUsage) :metrics metrics
+                                :counters (plist-get metrics :total))))))
       (when (and store id turn (equal turn (plist-get params :turnId))
                  (not (cl-some
                        (lambda (event)
@@ -314,20 +313,17 @@
               :connection connection :thread thread :handler handler :event event
               :callback callback :kind kind :deadline (+ (float-time) slopchat-codex-timeout))))
     (when (gethash thread (slopchat-connection-runs connection)) (error "Thread already active"))
-    (when slopchat-codex-memory-attempt
-      (puthash run (append slopchat-codex-memory-attempt (gethash run slopchat-codex--context-metadata)) slopchat-codex--context-metadata))
+    (when slopchat-codex-observation-route
+      (puthash run (append slopchat-codex-observation-route (gethash run slopchat-codex--context-metadata)) slopchat-codex--context-metadata))
     (puthash thread run (slopchat-connection-runs connection))
     (condition-case err
         (slopchat-codex-async
          connection "turn/start"
          `(:threadId ,thread :input [(:type "text" :text ,prompt)])
          (lambda (response)
-           (when (slopchat-run-context-store run)
-             (slopchat-context-event
-              (slopchat-run-context-store run) (slopchat-run-context-id run)
-              (list :kind 'submission
-                    :state (if (plist-get response :error) 'rejected 'acknowledged)
-                    :turn-id (plist-get (plist-get (plist-get response :result) :turn) :id))))
+           (slopchat-codex--observe run
+             (list :kind 'submission :state (if (plist-get response :error) 'rejected 'acknowledged)
+                   :turn-id (plist-get (plist-get (plist-get response :result) :turn) :id)))
            (if (plist-get response :error)
                (slopchat-codex--finish run (plist-get (plist-get response :error) :message))
              (setf (slopchat-run-turn run)

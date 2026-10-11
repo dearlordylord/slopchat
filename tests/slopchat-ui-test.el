@@ -1,5 +1,7 @@
 ;;; slopchat-ui-test.el --- Read-only UI tests -*- lexical-binding: t -*-
 (require 'slopchat-cli)
+(add-to-list 'load-path (file-name-directory (or load-file-name buffer-file-name)))
+(require 'slopchat-memory-compat)
 (ert-deftest slopchat-ui-startup-loaded ()
  (should (featurep 'slopchat-ui))
  (should (advice-member-p #'slopchat-ui--request 'slopchat-cli--request)))

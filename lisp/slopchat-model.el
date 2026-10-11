@@ -2,6 +2,8 @@
 (require 'slopchat-codex)
 (require 'slopchat-context)
 (defvar slopchat-model-context-store nil)
+(defvar slopchat-model-context-observer nil
+  "Application observation sink; accepts prepared/event/finished records.")
 (defvar slopchat-model-context-provenance nil)
 (defvar slopchat-model--connection nil)
 (defconst slopchat-model-eval-tools
@@ -23,20 +25,31 @@ fresh thread; continuation history is supplied explicitly by the Lisp agent."
          (requests nil)
          (outcome 'failed)
          (slopchat-codex-request-observer
-          (when slopchat-model-context-store
+          (when (or slopchat-model-context-store slopchat-model-context-observer)
             (lambda (method params)
               (when (member method '("thread/start" "turn/start"))
                 (push (slopchat-context-copy (list :method method :params params)) requests)
                 (when (equal method "turn/start")
                   (setq snapshot
-                        (slopchat-context-capture slopchat-model-context-store
-                                                  (reverse requests)
-                                                  slopchat-model-context-provenance))
-                  (slopchat-context-event slopchat-model-context-store snapshot
-                                          (list :kind 'submission :state 'prepared :prepared-at (float-time)))
+                        (if slopchat-model-context-observer
+                            (funcall slopchat-model-context-observer
+                                     (list :kind 'prepared :payload (reverse requests) :provenance slopchat-model-context-provenance))
+                          (slopchat-context-capture slopchat-model-context-store (reverse requests) slopchat-model-context-provenance)))
+                  (if slopchat-model-context-observer
+                      (funcall slopchat-model-context-observer
+                               (list :kind 'event :id snapshot :event (list :kind 'submission :state 'prepared :prepared-at (float-time))))
+                    (slopchat-context-event slopchat-model-context-store snapshot
+                                            (list :kind 'submission :state 'prepared :prepared-at (float-time))))
                   (let ((prepared-run (gethash (plist-get params :threadId)
                                               (slopchat-connection-runs connection))))
                     (when prepared-run
+                      (when slopchat-model-context-observer
+                        (puthash prepared-run
+                                 (plist-put (gethash prepared-run slopchat-codex--context-metadata) :emit
+                                            (let ((observe slopchat-model-context-observer) (id snapshot))
+                                              (lambda (event)
+                                                (funcall observe (list :kind 'event :id id :event event)))))
+                                 slopchat-codex--context-metadata))
                       (setf (slopchat-run-context-store prepared-run) slopchat-model-context-store
                             (slopchat-run-context-id prepared-run) snapshot))))))))
          (thread (condition-case err (slopchat-codex-thread
@@ -45,10 +58,16 @@ fresh thread; continuation history is supplied explicitly by the Lisp agent."
                   slopchat-model-eval-tools model)
                    (error
                     ;; Preserve only requests actually prepared before rejection.
-                    (when (and slopchat-model-context-store requests)
-                      (let ((id (slopchat-context-capture slopchat-model-context-store
-                                   (reverse requests) slopchat-model-context-provenance)))
-                        (slopchat-context-finish slopchat-model-context-store id 'failed)))
+                    (when requests
+                      (cond
+                       (slopchat-model-context-observer
+                        (let ((id (funcall slopchat-model-context-observer
+                                           (list :kind 'prepared :payload (reverse requests) :provenance slopchat-model-context-provenance))))
+                          (funcall slopchat-model-context-observer (list :kind 'finished :id id :outcome 'failed))))
+                       (slopchat-model-context-store
+                        (let ((id (slopchat-context-capture slopchat-model-context-store
+                                    (reverse requests) slopchat-model-context-provenance)))
+                          (slopchat-context-finish slopchat-model-context-store id 'failed)))))
                     (signal (car err) (cdr err)))))
          (run (slopchat-codex-run connection thread
                                      (slopchat-model-input messages)
@@ -88,11 +107,11 @@ fresh thread; continuation history is supplied explicitly by the Lisp agent."
                                            `(:threadId ,thread :turnId ,(slopchat-run-turn run)))))
         (slopchat-codex--finish run))
       (when snapshot
-        (slopchat-context-finish
-         slopchat-model-context-store snapshot
-         (if (and (boundp 'slopchat--round-token)
-                  slopchat--round-token (car slopchat--round-token))
-             'cancelled outcome)))
+        (let ((outcome (if (and (boundp 'slopchat--round-token)
+                                slopchat--round-token (car slopchat--round-token)) 'cancelled outcome)))
+          (if slopchat-model-context-observer
+              (funcall slopchat-model-context-observer (list :kind 'finished :id snapshot :outcome outcome))
+            (slopchat-context-finish slopchat-model-context-store snapshot outcome))))
       (slopchat-codex-forget-thread connection thread))))
 (defun slopchat-model-summary (connection thread prompt callback)
   "Start one tool-free summary response; retry policy belongs to memory."
@@ -104,8 +123,8 @@ fresh thread; continuation history is supplied explicitly by the Lisp agent."
        (setq tool-requested t)
        (let ((run (and (slopchat-connection-p connection)
                        (gethash thread (slopchat-connection-runs connection)))))
-         (when (and run (slopchat-run-context-store run) (slopchat-run-context-id run))
-           (slopchat-context-event (slopchat-run-context-store run) (slopchat-run-context-id run)
+         (when run
+           (slopchat-codex--observe run
                                   (list :kind 'summary-tool-rejection :state 'rejected
                                         :scope 'source-only :tool tool))))
        (error "Summary model cannot execute tools"))

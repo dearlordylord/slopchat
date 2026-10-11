@@ -1,0 +1,128 @@
+{
+  "kind": "memory-module-extraction-verification",
+  "governingSpecification": "docs/UNIICHAT.md",
+  "visibilitySpecification": "docs/memory-ux-spec.md",
+  "apiContract": "docs/memory-module.org",
+  "standaloneFiles": [
+    "lisp/memory.el",
+    "lisp/memory-store.el",
+    "lisp/memory-context.el",
+    "lisp/memory-usage.el"
+  ],
+  "sourceErt": {
+    "passed": 173,
+    "failed": 0,
+    "log": "/tmp/memory-module-verified-tests.log"
+  },
+  "compiledErt": {
+    "passed": 173,
+    "failed": 0,
+    "log": "/tmp/memory-module-compiled-tests.log"
+  },
+  "byteCompilation": {
+    "passed": true,
+    "warnings": 0,
+    "log": "/tmp/memory-module-compile-verified.log"
+  },
+  "ui": {
+    "passed": 52,
+    "failed": 0,
+    "assertions": 207,
+    "typecheck": true,
+    "log": "/tmp/memory-module-ui-tests.log"
+  },
+  "standalonePackage": {
+    "passed": true,
+    "applicationLoaded": false,
+    "copiedSourceFiles": 4,
+    "records": 2,
+    "backendAttempts": 2,
+    "input": 20,
+    "cachedInput": 0,
+    "cacheCoverage": 2,
+    "reopenIdentical": true
+  },
+  "applicationSocket": {
+    "passed": true,
+    "isolated": true,
+    "records": 3,
+    "durableAcceptanceBeforeReply": true,
+    "historyAndZoom": true,
+    "attemptInspection": true,
+    "unknownCachePreserved": true,
+    "orderlyShutdown": true,
+    "summaryActive": 0,
+    "summaryFailed": 0
+  },
+  "originalStoreComparison": {
+    "passed": true,
+    "records": 1024,
+    "nodes": 2047,
+    "everyMainViewIdentical": true,
+    "everyCompactionViewIdentical": true,
+    "everyNodeIdentical": true,
+    "mainBatchDrops": 5,
+    "compactionBatchDrops": 24,
+    "reopenIdentical": true,
+    "mainBytes": 89487,
+    "compactionBytes": 25040,
+    "baselineCommit": "26880f3c95460e9c39f63ace15dd2c8d001fc443",
+    "log": "/tmp/memory-module-compatibility-final.log"
+  },
+  "providerReplay": {
+    "passed": true,
+    "reopen": "identical",
+    "ledger": {
+      "started": 20,
+      "input": 232910,
+      "output": 2443,
+      "inputObserved": 20,
+      "outputObserved": 20,
+      "cachedInput": 180224,
+      "cachedInputObserved": 20,
+      "cacheWriteInput": 0,
+      "cacheWriteInputObserved": 20
+    },
+    "validationEvents": 20,
+    "details": "docs/memory-module-provider.json",
+    "log": "/tmp/memory-module-provider-final.log",
+    "scope": "Isolated regression ledger; not main-chat spend or a dollar invoice. Later diagnostic result attachment and optional presentation-policy changes are verified by deterministic tests."
+  },
+  "mainServer": {
+    "pid": 3408388,
+    "restarted": false,
+    "hotReloaded": false,
+    "observedCount": 7345,
+    "observedCursor": 7345,
+    "working": false,
+    "summaryActive": 0,
+    "summaryFailed": 0,
+    "scope": "Read-only status; the pre-extraction main process remains running. Fresh application processes use the extracted module."
+  },
+  "preservedPreexistingChanges": [
+    "docs/memory-audit.md multilevel retention audit",
+    "docs/memory-handoff.md multilevel retention audit"
+  ],
+  "limits": [
+    "Semantic fidelity of arbitrary summaries is not proven.",
+    "Call snapshots and usage ledger are session-only.",
+    "No separate package/repository publication or commit/push was performed."
+  ],
+  "supervisor": {
+    "passed": 5,
+    "failed": 0,
+    "log": "/tmp/memory-module-supervisor-tests.log"
+  },
+  "completionAudit": {
+    "publicFacadeAndOpaqueHandle": "lisp/memory.el; 23 standalone public API regressions",
+    "separateStateSchedulerStorage": "lisp/memory-store.el and lisp/memory.el; slopchat-chat has only a memory handle for memory ownership",
+    "allProductionConsumersUseFacade": "memory-public-application-has-no-private-memory-access; slopchat.el, CLI, UI, model and Codex backend checks",
+    "independentPackaging": "four copied source files in a fresh Emacs with no original application load path",
+    "asynchronousBackendAndLifetime": "out-of-order/duplicate completions, sync callbacks, close/cancel/reopen, immutable exact payload, typed failures and retry identity tests",
+    "specBehaviorUnchanged": "1024-record fixed-baseline comparison plus the existing memory/source-fidelity regressions",
+    "visibilityAndCoverage": "usage scope/high-water/late/retirement tests, raw validation and error-result inspection, shared retention tests and production 20/20 coverage",
+    "applicationIntegration": "fresh isolated socket server and production Codex replay",
+    "currentSourceAndCompiledValidation": "173/173 in each run; warning-free byte compilation; 52 UI tests and typecheck; 5 supervisor tests",
+    "contractAndReproduction": "README.org, docs/memory-module.org and linked script/evidence artifacts"
+  }
+}

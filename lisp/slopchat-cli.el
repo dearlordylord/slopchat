@@ -40,12 +40,11 @@
              (slopchat-pump chat)))
           ("zoom"
            (slopchat-cli--reply process
-                                `(:status "data" :value ,(slopchat-zoom chat (plist-get request :id)
-                                                                       (plist-get request :n)
-                                                                       (plist-get request :page)))))
+                                `(:status "data" :value ,(memory-zoom (slopchat-chat-memory chat) (plist-get request :id)
+                                             (plist-get request :n) :page (plist-get request :page)))))
           ("date"
            (slopchat-cli--reply process
-                                `(:status "data" :value ,(slopchat-date chat (plist-get request :id)))))
+                                `(:status "data" :value ,(memory-date (slopchat-chat-memory chat) (plist-get request :id)))))
           ("cancel" (slopchat-cli--reply process
             `(:status "data" :value ,(if (slopchat-cancel-round chat) t :false))))
           ("stop" (slopchat-cli--reply process '(:status "stopping"))

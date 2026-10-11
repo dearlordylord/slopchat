@@ -1,5 +1,7 @@
 ;;; slopchat-failure-test.el --- Accepted failures remain visible -*- lexical-binding: t -*-
 (require 'ert)
+(add-to-list 'load-path (file-name-directory (or load-file-name buffer-file-name)))
+(require 'slopchat-memory-compat)
 (require 'slopchat-ui)
 
 (ert-deftest slopchat-failed-accepted-input-remains-in-history ()

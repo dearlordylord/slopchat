@@ -1,5 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 (require 'ert)
+(add-to-list 'load-path (file-name-directory (or load-file-name buffer-file-name)))
+(require 'slopchat-memory-compat)
 (require 'slopchat-process)
 (ert-deftest slopchat-process-completion ()
  (let ((r (slopchat-exec-command "printf hello" nil 1000))) (should (equal (plist-get r :status) "exited")) (should (= (plist-get r :exit-code) 0)) (should (string-match-p "hello" (plist-get r :output)))))

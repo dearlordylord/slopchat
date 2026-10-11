@@ -1,6 +1,7 @@
 ;;; slopchat-ui.el --- Bounded read-only UI protocol -*- lexical-binding: t -*-
 (require 'slopchat)
 (require 'pp)
+(declare-function slopchat-cli--reply "slopchat-cli" (process value))
 
 (defun slopchat-ui--limit (value default maximum)
   (unless (or (null value) (natnump value)) (error "Expected nonnegative integer"))
@@ -8,7 +9,7 @@
 
 (defun slopchat-ui-history (chat request)
   "Read a bounded page; COUNT is the snapshot watermark for subsequent pages."
-  (let* ((count (slopchat-chat-count chat))
+  (let* ((count (plist-get (slopchat--memory-status chat) :count))
          (before (plist-get request :before))
          (after (plist-get request :after))
          (limit (slopchat-ui--limit (plist-get request :limit) 40 100))
@@ -16,7 +17,7 @@
          (start (if after (progn (unless (natnump after) (error "Invalid after")) (min after end)) (max 0 (- end limit))))
          (end (min end (+ start limit))) messages (bytes 0))
     (cl-loop for id from start below end do
-             (let* ((message (copy-sequence (gethash id (slopchat-chat-messages chat))))
+             (let* ((message (memory-inspect (slopchat-chat-memory chat) (list :kind 'record :id id)))
                     (presentation (plist-get message :tool)))
                ;; Old journal records can contain unbounded presentation metadata.
                (when presentation
@@ -89,37 +90,40 @@
 (defun slopchat-ui--next-basis (chat)
   "Read-only fresh-round character basis; never submit a draft."
   (when (slopchat-chat-agent chat)
-    (let* ((memory (slopchat-render chat))
-           (entry (car (slopchat-context-store-entries (slopchat-chat-context chat))))
+    (let* ((memory (plist-get (memory-snapshot (slopchat-chat-memory chat) :before (plist-get (slopchat--memory-status chat) :cursor)) :text))
+           (entry (car (slopchat-ui--calls chat)))
            (instructions (slopchat-ui--context-section entry "instructions"))
            (tools (slopchat-ui--context-section entry "tools"))
            (input (concat "Conversation (Emacs Lisp data):\n" (prin1-to-string (vector (list :role "user" :content (concat memory "\n\n")))))))
       (when (and (stringp instructions) (not (eq tools 'slopchat-context-field-unavailable)))
         (list :instructions (length instructions) :tools (length (prin1-to-string tools)) :input (length input) :memory (length (substring (prin1-to-string memory) 1 -1)))))))
 
+(defun slopchat-ui--calls (chat)
+  (plist-get (memory-inspect (slopchat-chat-memory chat) '(:kind attempts :details t :limit 100)) :entries))
+
 (defun slopchat-ui-status (chat request)
-  "Bounded memory page and truthful server measurements, without journal writes."
+  "Project the public memory interface and application state, without writes."
   (let* ((offset (or (plist-get request :offset) 0))
          (limit (slopchat-ui--limit (plist-get request :limit) 40 100))
-         (view (slopchat-chat-view chat)) nodes)
+         (status (slopchat--memory-status chat))
+         (entries (slopchat-ui--calls chat))
+         (entry (car entries))
+         (reported (cl-find-if (lambda (candidate)
+                                (numberp (plist-get (plist-get (plist-get (slopchat-ui--context-observation candidate) :metrics) :last) :input))) entries))
+         (nodes (memory-inspect (slopchat-chat-memory chat) (list :kind 'nodes :offset offset :limit limit))))
     (unless (natnump offset) (error "Invalid offset"))
-    (cl-loop for key in (nthcdr (min offset (length view)) view)
-             for index from 0 below limit do
-             (let ((range (slopchat-range key)) (node (slopchat-node chat key)))
-               (push `(:id ,(car range) :n ,(cdr range) :text ,(plist-get node :text)) nodes)))
-    `(:count ,(slopchat-chat-count chat) :cursor ,(slopchat-chat-cursor chat)
-      :stream ,(or (slopchat-chat-stream chat) :null)
-      :memoryUsage ,(slopchat-memory-usage-project (slopchat-memory-usage-ledger chat))
-      :nextBasis ,(or (slopchat-ui--next-basis chat) :null)
-      :contextCall ,(let* ((store (slopchat-chat-context chat))
-                          (entry (car (and store (slopchat-context-store-entries store)))))
-                     (if entry (list :id (plist-get entry :id)
-                                     :observation (slopchat-ui--context-observation entry) :lastReported (let ((reported (cl-find-if (lambda (candidate) (numberp (plist-get (plist-get (plist-get (slopchat-ui--context-observation candidate) :metrics) :last) :input))) (slopchat-context-store-entries store)))) (if reported (list :id (plist-get reported :id) :observation (slopchat-ui--context-observation reported)) :null)) :estimate (or (slopchat-ui--calibrated-estimate entry (slopchat-context-store-entries store)) (slopchat-ui--token-estimate entry) :null)) :null))
-      :working ,(if (slopchat-chat-run chat) t :false)
-      :summaryActive ,(slopchat-chat-active chat)
-      :summaryFailed ,(length (slopchat-chat-failed chat))
-      :contextBytes ,(slopchat-view-size chat view)
-      :viewTotal ,(length view) :offset ,offset :nodes ,(vconcat (nreverse nodes)))))
+    (list :count (plist-get status :count) :cursor (plist-get status :cursor)
+          :stream (or (slopchat-chat-stream chat) :null)
+          :memoryUsage (memory-inspect (slopchat-chat-memory chat) 'usage)
+          :nextBasis (or (slopchat-ui--next-basis chat) :null)
+          :contextCall (if entry (list :id (plist-get entry :id)
+                                      :observation (slopchat-ui--context-observation entry)
+                                      :lastReported (if reported (list :id (plist-get reported :id) :observation (slopchat-ui--context-observation reported)) :null)
+                                      :estimate (or (slopchat-ui--calibrated-estimate entry entries) (slopchat-ui--token-estimate entry) :null)) :null)
+          :working (if (slopchat-chat-run chat) t :false)
+          :summaryActive (plist-get status :active) :summaryFailed (length (plist-get status :failed))
+          :contextBytes (plist-get status :context-bytes) :viewTotal (plist-get status :view-total)
+          :offset offset :nodes (vconcat (mapcar (lambda (node) (list :id (plist-get node :id) :n (plist-get node :n) :text (plist-get node :text))) nodes)))))
 
 (defun slopchat-ui-models (chat)
   "Return a bounded account model catalog and current selection."
@@ -150,27 +154,19 @@
   `(:selected ,(or model :null)))
 
 (defun slopchat-ui-context-calls (chat request)
-  "List bounded session call metadata without copying private payloads."
-  (let* ((offset (plist-get request :offset))
-         (anchor (plist-get request :id))
-         (limit (slopchat-ui--limit (plist-get request :limit) 20 100))
-         (store (slopchat-chat-context chat))
-         (entries (and store (slopchat-context-store-entries store))))
+  "List bounded session call metadata through the memory interface."
+  (let* ((offset (plist-get request :offset)) (anchor (plist-get request :id))
+         (limit (slopchat-ui--limit (plist-get request :limit) 20 100)))
     (when (and anchor (not (stringp anchor))) (error "Invalid context call ID"))
-    (unless offset
-      (setq offset (if anchor
-                       (* limit (/ (or (cl-position anchor entries :test #'equal
-                                                    :key (lambda (entry) (plist-get entry :id))) 0) limit))
-                     0)))
-    (unless (natnump offset) (error "Invalid context offset"))
-    (list :total (length entries) :offset offset
-          :calls (vconcat
-                  (cl-loop for entry in (nthcdr offset entries)
-                           for index from 0 below limit
-                           collect (list :id (plist-get entry :id)
-                                         :terminal (if (plist-get entry :terminal) t :false)
-                                         :outcome (if (plist-get entry :outcome)
-                                                      (symbol-name (plist-get entry :outcome)) :null)))))))
+    (when (and offset (not (natnump offset))) (error "Invalid context offset"))
+    (let ((page (memory-inspect (slopchat-chat-memory chat)
+                                (append (list :kind 'attempts :limit limit :id anchor)
+                                        (when offset (list :offset offset))))))
+      (list :total (plist-get page :total) :offset (plist-get page :offset)
+            :calls (vconcat (mapcar (lambda (entry)
+                                      (list :id (plist-get entry :id) :terminal (if (plist-get entry :terminal) t :false)
+                                            :outcome (if (plist-get entry :outcome) (symbol-name (plist-get entry :outcome)) :null)))
+                                    (plist-get page :entries)))))))
 
 (defun slopchat-ui--context-section (snapshot section)
   "Project captured request fields without rebuilding input."
@@ -198,28 +194,27 @@
 
 (defun slopchat-ui-context (chat request)
   "Read a bounded exact snapshot page; absence is a normal result."
-  (let* ((store (slopchat-chat-context chat))
-         (id (plist-get request :id))
+  (let* ((id (plist-get request :id))
          (section (or (plist-get request :section) "payload"))
          (offset (or (plist-get request :offset) 0))
          (limit (slopchat-ui--limit (plist-get request :limit) 2000 8000)))
     (unless (member section '("payload" "provenance" "events" "instructions" "tools" "input")) (error "Invalid context section"))
     (unless (natnump offset) (error "Invalid context offset"))
     (unless (or (null id) (stringp id)) (error "Invalid context ID"))
-    (unless id (setq id (plist-get (car (and store (slopchat-context-store-entries store))) :id)))
-    (let ((snapshot (and store id (slopchat-context-get store id))))
+    (unless id (setq id (plist-get (car (slopchat-ui--calls chat)) :id)))
+    (let ((snapshot (and id (memory-inspect (slopchat-chat-memory chat) (list :kind 'attempt-detail :id id)))))
       (if (not (plist-get snapshot :available))
-          (list :available :false :memoryUsage (slopchat-memory-usage-project (slopchat-memory-usage-ledger chat)))
+          (list :available :false :memoryUsage (memory-inspect (slopchat-chat-memory chat) 'usage))
         (let* ((value (slopchat-ui--context-section snapshot section))
                (input-text (and (equal section "input") (slopchat-ui--context-input-text value)))
                (text (if (and (member section '("instructions" "tools" "input")) (eq value 'slopchat-context-field-unavailable)) "Captured field unavailable" (cond (input-text input-text) ((and (equal section "instructions") (stringp value)) value) ((equal section "tools") (pp-to-string value)) (t (prin1-to-string value)))))
                (start (min offset (length text)))
                (end (min (length text) (+ start limit))))
-          `(:available t :memoryUsage ,(slopchat-memory-usage-project (slopchat-memory-usage-ledger chat)) :id ,id :terminal ,(if (plist-get snapshot :terminal) t :false)
+          `(:available t :memoryUsage ,(memory-inspect (slopchat-chat-memory chat) 'usage) :id ,id :terminal ,(if (plist-get snapshot :terminal) t :false)
             :kind ,(if (eq (plist-get (plist-get snapshot :provenance) :kind) 'compaction) "compaction" "turn")
             :attempt ,(or (plist-get (plist-get snapshot :provenance) :attempt) 1)
             :outcome ,(if (plist-get snapshot :outcome) (symbol-name (plist-get snapshot :outcome)) :null)
-            :estimate ,(or (slopchat-ui--calibrated-estimate snapshot (slopchat-context-store-entries store)) (slopchat-ui--token-estimate snapshot) :null) :observation ,(slopchat-ui--context-observation snapshot)
+            :estimate ,(or (slopchat-ui--calibrated-estimate snapshot (slopchat-ui--calls chat)) (slopchat-ui--token-estimate snapshot) :null) :observation ,(slopchat-ui--context-observation snapshot)
             :format ,(if (or input-text (equal section "instructions")) "text" "lisp") :offset ,start :end ,end :total ,(length text) :text ,(substring text start end)))))))
 
 
@@ -228,7 +223,7 @@
   (let* ((id (plist-get request :id))
          (offset (or (plist-get request :offset) 0)))
     (unless (and (natnump id) (natnump offset)) (error "Invalid expression page"))
-    (let* ((message (gethash id (slopchat-chat-messages chat)))
+    (let* ((message (memory-inspect (slopchat-chat-memory chat) (list :kind 'record :id id)))
            (tool (plist-get message :tool))
            (call (plist-get tool :callId))
            (first (plist-get tool :requestFirst))
@@ -237,10 +232,10 @@
       (unless (and tool (equal (plist-get message :kind) "tool")) (error "Tool request unavailable"))
       (if (and (natnump first) (natnump parts))
           (cl-loop for index from first below (+ first parts) do
-                   (push (plist-get (gethash index (slopchat-chat-messages chat)) :text) fragments))
+                   (push (plist-get (memory-inspect (slopchat-chat-memory chat) (list :kind 'record :id index)) :text) fragments))
         ;; Legacy presentations repeated the whole expression in each fragment.
-        (cl-loop for index from 0 below (slopchat-chat-count chat) do
-                 (let ((part (gethash index (slopchat-chat-messages chat))))
+        (cl-loop for index from 0 below (plist-get (slopchat--memory-status chat) :count) do
+                 (let ((part (memory-inspect (slopchat-chat-memory chat) (list :kind 'record :id index))))
                    (when (and (equal (plist-get part :kind) "tool")
                               (equal (plist-get (plist-get part :tool) :callId) call))
                      (push (plist-get part :text) fragments)))))

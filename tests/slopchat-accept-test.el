@@ -1,5 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 (require 'ert)
+(add-to-list 'load-path (file-name-directory (or load-file-name buffer-file-name)))
+(require 'slopchat-memory-compat)
 (require 'cl-lib)
 (require 'slopchat-cli)
 (ert-deftest slopchat-opt-in-acceptance ()
@@ -17,15 +19,15 @@
    (should (equal responses '((:status "steered")))))))
 
 (ert-deftest slopchat-acceptance-before-pump ()
- (let ((chat (slopchat--chat-create :count 0 :queued-input (slopchat-queue-create))) events)
-  (cl-letf (((symbol-function 'slopchat-log) (lambda (&rest _) (push 'durable events)))
+ (let ((chat (slopchat--chat-create :queued-input (slopchat-queue-create))) events)
+  (cl-letf (((symbol-function 'memory-append) (lambda (&rest _) (push 'durable events) '(:first-id 0 :ids (0) :end-exclusive 1)))
             ((symbol-function 'slopchat-pump) (lambda (_) (should (equal events '(accepted durable))) (push 'pump events))))
    (slopchat-submit chat "input" nil (lambda (_) (push 'accepted events)))
    (should (equal events '(pump accepted durable))))))
 
 (ert-deftest slopchat-cli-ack-before-blocked-pump ()
- (let ((chat (slopchat--chat-create :count 0 :queued-input (slopchat-queue-create))) responses)
-  (cl-letf (((symbol-function 'slopchat-log) (lambda (&rest _) nil))
+ (let ((chat (slopchat--chat-create :queued-input (slopchat-queue-create))) responses)
+  (cl-letf (((symbol-function 'memory-append) (lambda (&rest _) '(:first-id 0 :ids (0) :end-exclusive 1)))
             ((symbol-function 'slopchat-cli--reply) (lambda (_ value) (push value responses)))
             ((symbol-function 'slopchat-pump) (lambda (_)
                (should (equal responses '((:status "accepted" :value 0))))
@@ -35,8 +37,8 @@
    (should (equal responses '((:status "accepted" :value 0)))))))
 
 (ert-deftest slopchat-queue-only-never-steers ()
- (let* ((run (slopchat--run-create :turn "live")) (chat (slopchat--chat-create :count 0 :run run :queued-input (slopchat-queue-create))) accepted)
-  (cl-letf (((symbol-function 'slopchat-log) (lambda (&rest _) nil))
+ (let* ((run (slopchat--run-create :turn "live")) (chat (slopchat--chat-create :run run :queued-input (slopchat-queue-create))) accepted)
+  (cl-letf (((symbol-function 'memory-append) (lambda (&rest _) '(:first-id 0 :ids (0) :end-exclusive 1)))
             ((symbol-function 'slopchat-pump) (lambda (_) nil))
             ((symbol-function 'slopchat-codex-steer) (lambda (&rest _) (ert-fail "must not steer"))))
    (slopchat-submit chat "later" nil (lambda (_) (setq accepted t)) t)
