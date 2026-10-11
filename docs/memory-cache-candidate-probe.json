@@ -1,0 +1,24 @@
+{
+  "kind": "ordinary-protocol-correctness-check",
+  "observedAt": "2026-10-11T03:28:49.470835+00:00",
+  "codexVersion": "0.162.1",
+  "model": "gpt-6-luna",
+  "emptyIndependentForks": 2,
+  "modelCalls": 0,
+  "methods": [
+    "thread/fork",
+    "thread/fork",
+    "thread/unsubscribe",
+    "thread/unsubscribe"
+  ],
+  "tests": {
+    "passed": 3,
+    "failed": 0
+  },
+  "sourceSha256": {
+    "lisp/slopchat-cache-candidate.el": "e7da81f800f3b940fa37fabc99357ae60931514c89f69ba3c3f03cfed185256c",
+    "tests/slopchat-cache-candidate-test.el": "9c2cb790faa6f8fe6e70021fe8af3feebcb9debbdce48d8f08c31a019b15aa78"
+  },
+  "claimLimit": "Protocol feasibility only; tools at inference and cache performance unverified; no A/B executed.",
+  "anchorIntegrity": "SHA-256 check before fork; appended response history rejected without RPC"
+}

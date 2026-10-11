@@ -1,0 +1,118 @@
+;;; cache-affinity-ab.el --- Bounded, isolated A/B evaluator -*- lexical-binding: t -*-
+(require 'slopchat)
+(require 'slopchat-cache-candidate)
+
+(let* ((root (expand-file-name ".autoresearch/cache-affinity-evidence" default-directory))
+       (receipt (expand-file-name "observations.json" root))
+       (started (float-time))
+       (slopchat-codex-timeout 180)
+       (connection nil) (anchor nil) rows ids (calls 0)
+       (usage (make-hash-table :test #'equal))
+       (instructions (slopchat-model-instructions (slopchat--provider-instructions)))
+       (prefix (mapconcat
+                (lambda (n) (format "%d: archived build completed; checksum %s; no current settings change."
+                                    n (secure-hash 'sha256 (format "fixture-record-%d" n))))
+                (number-sequence 0 511) "\n"))
+       (observer (lambda (_connection message)
+                   (when (equal (plist-get message :method) "thread/tokenUsage/updated")
+                     (let ((params (plist-get message :params)))
+                       (puthash (plist-get params :threadId) (plist-get params :tokenUsage) usage))))))
+  ;; Persistent reservation prevents an accidental rerun from spending eight more calls.
+  (when (file-exists-p receipt)
+    (let ((prior (with-temp-buffer (insert-file-contents receipt)
+                   (json-parse-buffer :object-type 'plist :array-type 'array :null-object :null))))
+      (setq calls (plist-get prior :callsReserved)
+            started (plist-get prior :started)
+            rows (reverse (append (plist-get prior :rows) nil))
+            ids (mapcar (lambda (r) (plist-get r :thread)) rows))
+      (unless (and (= calls 1) (= (length rows) 1)
+                   (equal (plist-get (car rows) :arm) "A")
+                   (equal (plist-get (car rows) :output)
+                          (concat "user: " (plist-get (car rows) :expected))))
+        (error "Receipt cannot resume this specific evaluator-format repair"))))
+  (make-directory root t)
+  (cl-labels ((save ()
+                (with-temp-file receipt
+                  (insert (json-serialize
+                           (list :started started :model "gpt-6-luna" :callsReserved calls
+                                 :rows (vconcat (reverse rows)))) "\n"))))
+    (save)
+    (unwind-protect
+        (progn
+          (setq connection (slopchat-codex-open)
+                anchor (slopchat-cache-anchor-create temporary-file-directory instructions
+                         slopchat-model-eval-tools "gpt-6-luna"))
+          (advice-add 'slopchat-codex--dispatch :before observer)
+          (dotimes (pair 4)
+            (let* ((port (+ 4317 pair))
+                   (expected (format "Orion: port %d; mode read-only; retries 0." port))
+                   (task (concat "<chat>\n" prefix "\n</chat>\n<input>\n"
+                                 (format "Current Orion configuration: port %d, read-only, zero retries.\n" port)
+                                 "</input>\nSummarize only the current configuration, one line, <=512 UTF-8 bytes. "
+                                 "Do not call tools. Return exactly: " expected))
+                   (input (slopchat-model-input (vector (list :role "user" :content task)))))
+              (dolist (arm (if (= (% pair 2) 0) '("A" "B") '("B" "A")))
+                (unless (and (= pair 0) (equal arm "A") rows)
+                (when (or (>= calls 8) (> (- (float-time) started) 3500))
+                  (error "A/B budget exhausted"))
+                (let* ((thread
+                        (if (equal arm "A")
+                            (let* ((reply (slopchat-codex-rpc connection "thread/start"
+                                          (list :cwd temporary-file-directory :modelProvider "openai"
+                                                :model "gpt-6-luna" :ephemeral t :approvalPolicy "never"
+                                                :sandbox "danger-full-access" :baseInstructions instructions
+                                                :dynamicTools slopchat-model-eval-tools
+                                                :config (or (slopchat-connection-thread-config connection)
+                                                            (make-hash-table)))))
+                                   (info (plist-get reply :thread)))
+                              (unless (and (plist-member info :turns)
+                                           (equal (plist-get info :turns) [])
+                                           (equal (plist-get reply :model) "gpt-6-luna"))
+                                (error "A history/model mismatch"))
+                              (plist-get info :id))
+                          (slopchat-cache-fresh-thread connection anchor)))
+                       run text counters)
+                  (when (member thread ids) (error "Reused thread identity"))
+                  (push thread ids)
+                  (cl-incf calls) (save)
+                  (setq run (slopchat-codex-run connection thread input nil nil nil 'compaction))
+                  (setf (slopchat-run-deferred run) t)
+                  (while (and (not (slopchat-run-done run)) (null (slopchat-run-requests run)))
+                    (slopchat-codex-pump connection 0.05))
+                  (when (slopchat-run-requests run)
+                    (when (slopchat-run-turn run)
+                      (slopchat-codex-rpc connection "turn/interrupt"
+                                          (list :threadId thread :turnId (slopchat-run-turn run))))
+                    (error "Summary requested a tool; no tool executed"))
+                  (setq text (slopchat-codex-result run))
+                  (let ((until (+ (float-time) 10)))
+                    (while (and (not (gethash thread usage)) (< (float-time) until))
+                      (slopchat-codex-pump connection 0.05)))
+                  (setq counters (plist-get (slopchat-codex--normalize-usage (gethash thread usage)) :total))
+                  (push (list :arm arm :pair pair :thread thread :turn (slopchat-run-turn run)
+                              :inputSha256 (secure-hash 'sha256 input) :instructionsSha256 (secure-hash 'sha256 instructions)
+                              :emptyHistory t :toolsExecuted 0 :output text :expected expected
+                              :error (or (slopchat-run-error run) :null)
+                              :usage (or counters (make-hash-table))
+                              :rawUsage (or (gethash thread usage) (make-hash-table))) rows)
+                  (save)
+                  (unless (and (not (slopchat-run-error run)) (member (string-trim text) (list expected (concat "user: " expected)))
+                               (<= (string-bytes text) 512)
+                               (natnump (plist-get counters :input))
+                               (natnump (plist-get counters :cached-input))
+                               (natnump (plist-get counters :output))
+                               (<= (plist-get counters :cached-input) (plist-get counters :input)))
+                    (error "A/B correctness/usage check failed; receipt retained"))
+                  (slopchat-codex-forget-thread connection thread)
+                  (princ (format "SAMPLE arm=%s pair=%d input=%d cached=%d uncached=%d output=%d\n"
+                                 arm pair (plist-get counters :input) (plist-get counters :cached-input)
+                                 (- (plist-get counters :input) (plist-get counters :cached-input))
+                                 (plist-get counters :output))))))))
+          (let* ((b (cl-remove-if-not (lambda (r) (equal (plist-get r :arm) "B")) rows))
+                 (mean (/ (cl-loop for r in b for u = (plist-get r :usage)
+                                   sum (- (plist-get u :input) (plist-get u :cached-input))) 4.0)))
+            (princ (format "METRIC uncached_input=%s\nARTIFACT observations=%s\n" mean receipt))
+            (princ "AUTORESEARCH_OBSERVATION {\"kind\":\"predicate\",\"observed\":\"satisfied\"}\n")))
+      (advice-remove 'slopchat-codex--dispatch observer)
+      (when connection (slopchat-codex-close connection))
+      (when anchor (slopchat-cache-anchor-close anchor)))))

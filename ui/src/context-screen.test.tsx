@@ -94,3 +94,12 @@ test('reply context link opens the exact historical invocation',async()=>{
   const link=t.renderer.root.findDescendantById('context-link-7');if(!link)throw Error('Missing context link');await t.mockMouse.pressDown(link.x,link.y);await t.mockMouse.release(link.x,link.y);await t.waitForFrame(f=>f.includes('exact:42 /'));expect(requests).toContainEqual({action:'context',section:'payload',offset:0,id:'exact:42'});
  }finally{flushSync(()=>root.unmount());release();await client.close();registry.dispose();t.renderer.destroy()}
 })
+
+test('compaction inspection shows cache counters and reporting coverage',async()=>{
+ const {ContextScreen}=await import('./context-screen');const t=await createTestRenderer({width:120,height:40,kittyKeyboard:true});const registry=Registry.make();const client=makeClient('/tmp/context-cache',registry);const root=createRoot(t.renderer);
+ client.inspect=p=>Effect.succeed({value:'action' in p&&p.action==='context-calls'?{total:1,offset:0,calls:[{id:'summary',terminal:true,outcome:'completed'}]}:{available:true,id:'summary',kind:'compaction',attempt:2,terminal:true,outcome:'completed',observation:{source:'fixture',receivedAt:123,metrics:{last:{input:10,'cached-input':8,output:2},total:{input:30,'cached-input':24,output:6}}},memoryUsage:{started:2,input:30,inputObserved:2,output:6,outputObserved:2,cachedInput:24,cachedInputObserved:2,cacheWriteInput:0,cacheWriteInputObserved:0,since:123,legacy:{started:3,input:99,output:7,inputObserved:3,outputObserved:3}},offset:0,end:0,total:0,text:''}});
+ try{
+  flushSync(()=>root.render(<RegistryContext.Provider value={registry}><ContextScreen client={client} onExit={()=>{}}/></RegistryContext.Provider>));await t.waitForFrame(f=>f.includes('compaction attempt 2'));
+  const frame=t.captureCharFrame();expect(frame).toContain('cache read: 8');expect(frame).toContain('Reported thread totals: input 30');expect(frame).toContain('cache read 24 (2/2 attempts)');expect(frame).toContain('cache write unavailable (0/2 attempts)');expect(frame).toContain('Legacy memory work before activation: input 99');expect(frame).toContain('Accounting period began:');
+ }finally{flushSync(()=>root.unmount());await client.close();registry.dispose();t.renderer.destroy()}
+})

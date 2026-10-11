@@ -91,9 +91,9 @@
     (let ((metadata (gethash run slopchat-codex--context-metadata)))
       (when (or (slopchat-run-context-id run) (plist-get metadata :memory-ledger))
         (slopchat-codex--retire-memory-route
-         (gethash (slopchat-run-thread run)
+         (gethash (list (slopchat-run-thread run) (slopchat-run-turn run))
                   (slopchat-connection-observations (slopchat-run-connection run))))
-        (puthash (slopchat-run-thread run)
+        (puthash (list (slopchat-run-thread run) (slopchat-run-turn run))
                  (append (list :store (slopchat-run-context-store run)
                                :id (slopchat-run-context-id run) :turn (slopchat-run-turn run)
                                :expires (+ (float-time) 30)) metadata)
@@ -135,7 +135,7 @@
   (let* ((routes (slopchat-connection-observations connection))
          (now (float-time)))
     (slopchat-codex--prune-observations connection)
-    (let* ((route (gethash (plist-get params :threadId) routes))
+    (let* ((route (gethash (list (plist-get params :threadId) (plist-get params :turnId)) routes))
            (run (if (and run (equal (slopchat-run-turn run) (plist-get params :turnId))) run nil))
            (store (if run (slopchat-run-context-store run) (plist-get route :store)))
            (id (if run (slopchat-run-context-id run) (plist-get route :id)))
@@ -144,8 +144,11 @@
              (ledger (plist-get metadata :memory-ledger))
              (attempt (plist-get metadata :memory-attempt)))
         (when (and ledger attempt turn (equal turn (plist-get params :turnId)))
-          (slopchat-memory-usage-observe ledger attempt
-            (plist-get (slopchat-codex--normalize-usage (plist-get params :tokenUsage)) :last))))
+          (let ((metrics (slopchat-codex--normalize-usage (plist-get params :tokenUsage)))
+                (state (plist-get metadata :memory-thread-state)))
+            (if state
+                (slopchat-memory-usage-observe-total ledger attempt state (plist-get metrics :total))
+              (slopchat-memory-usage-observe ledger attempt (plist-get metrics :last))))))
       (when (and store id turn (equal turn (plist-get params :turnId))
                  (not (cl-some
                        (lambda (event)

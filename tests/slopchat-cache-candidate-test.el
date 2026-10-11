@@ -1,0 +1,113 @@
+;;; slopchat-cache-candidate-test.el --- Empty-fork contract checks -*- lexical-binding: t -*-
+(require 'ert)
+(add-to-list 'load-path (expand-file-name "../lisp" (file-name-directory load-file-name)))
+(require 'slopchat-cache-candidate)
+(require 'slopchat-model)
+(require 'slopchat-ui)
+
+(ert-deftest slopchat-cache-runtime-catalogue-never-silently-selects-legacy ()
+  (let* ((directory (make-temp-file "cache-runtime-test-" t))
+         (process-environment (cons (concat "CODEX_HOME=" directory) process-environment)))
+    (unwind-protect
+        (progn
+          (with-temp-file (expand-file-name "models_cache.json" directory)
+            (insert "{\"models\":[{\"slug\":\"gpt-6-luna\",\"multi_agent_version\":\"v2\"},{\"slug\":\"legacy\"}]}"))
+          (should (equal (slopchat-cache-runtime-version "gpt-6-luna") "v2"))
+          (should-error (slopchat-cache-runtime-version "legacy"))
+          (should-error (slopchat-cache-runtime-version "absent")))
+      (delete-directory directory t))))
+
+(ert-deftest slopchat-cache-anchor-has-only-metadata ()
+  (let ((anchor (slopchat-cache-anchor-create temporary-file-directory "Stable instructions"
+                                              slopchat-model-eval-tools "gpt-6-luna" "v2")))
+    (unwind-protect
+        (with-temp-buffer
+          (insert-file-contents (slopchat-cache-anchor-path anchor))
+          (should (= (count-lines (point-min) (point-max)) 1))
+          (let* ((line (json-parse-buffer :object-type 'plist :array-type 'array))
+                 (meta (plist-get line :payload)))
+            (should (equal (plist-get line :type) "session_meta"))
+            (should (equal (plist-get meta :id) (plist-get meta :session_id)))
+            (should (equal (plist-get meta :multi_agent_version) "v2"))
+            (should (equal (plist-get meta :dynamic_tools) slopchat-model-eval-tools))
+            (should (equal (plist-get (plist-get meta :base_instructions) :text) "Stable instructions"))
+            (should (= (logand (file-modes (slopchat-cache-anchor-path anchor)) #o777) #o600))))
+      (slopchat-cache-anchor-close anchor))
+    (should-not (file-exists-p (slopchat-cache-anchor-path anchor)))))
+
+(ert-deftest slopchat-cache-fork-validates-history-identity-and-model ()
+  (let ((anchor (slopchat-cache--anchor-create :path "/unused" :id "anchor" :directory "/tmp/"
+                                             :instructions "Stable" :tools [] :model "gpt-6-luna"))
+        (connection (slopchat--connection-create)) params forgotten)
+    (setf (slopchat-cache-anchor-digest anchor) "test-digest")
+    (cl-letf (((symbol-function 'slopchat-cache--file-digest) (lambda (_) "test-digest"))
+              ((symbol-function 'slopchat-codex-forget-thread)
+               (lambda (_ id) (push id forgotten))))
+      (dolist (reply '((:model "gpt-6-luna" :thread (:id "anchor" :turns []))
+                       (:model "wrong" :thread (:id "wrong-model" :turns []))
+                       (:model "gpt-6-luna" :thread (:id "used" :turns [(:id "turn")]))
+                       (:model "gpt-6-luna" :thread (:id "hidden"))))
+        (cl-letf (((symbol-function 'slopchat-codex-rpc) (lambda (&rest _) reply)))
+          (should-error (slopchat-cache-fresh-thread connection anchor))))
+      (cl-letf (((symbol-function 'slopchat-codex-rpc)
+                 (lambda (_ method prepared)
+                   (should (equal method "thread/fork")) (setq params prepared)
+                   '(:model "gpt-6-luna" :thread (:id "fresh" :turns [])))))
+        (should (equal (slopchat-cache-fresh-thread connection anchor) "fresh"))
+        (should (eq (plist-get params :ephemeral) t))
+        ;; Hydrate turns: excludeTurns would hide inherited conversation in the response.
+        (should (eq (plist-get params :excludeTurns) :false))
+        (should (equal (plist-get params :baseInstructions) "Stable"))
+        (should-error (slopchat-cache-fresh-thread connection anchor)))
+      (should (= (length forgotten) 5)))))
+
+(ert-deftest slopchat-cache-modified-anchor-never-submitted ()
+  (let ((anchor (slopchat-cache-anchor-create temporary-file-directory "Stable" [] "gpt-6-luna" "v2"))
+        submitted)
+    (unwind-protect
+        (progn
+          (with-temp-buffer
+            (insert "{\"type\":\"response_item\",\"payload\":{\"role\":\"user\"}}\n")
+            (write-region (point-min) (point-max) (slopchat-cache-anchor-path anchor) t 'silent))
+          (cl-letf (((symbol-function 'slopchat-codex-rpc)
+                     (lambda (&rest _) (setq submitted t))))
+            (should-error (slopchat-cache-fresh-thread nil anchor)))
+          (should-not submitted))
+      (slopchat-cache-anchor-close anchor))))
+
+(ert-deftest slopchat-cache-summary-reuses-only-matching-anchor-and-cleans-up ()
+  (let* ((process (make-pipe-process :name "cache-route-test" :noquery t))
+         (connection (slopchat--connection-create :process process)) anchors)
+    (unwind-protect
+        (cl-letf (((symbol-function 'slopchat-cache-runtime-version) (lambda (_) "v2"))
+                  ((symbol-function 'slopchat-cache-fresh-thread)
+                   (lambda (_ anchor) (push anchor anchors) (format "fresh-%d" (length anchors)))))
+          (should (equal (slopchat-cache-summary-thread connection "/tmp" "Stable" [] "gpt-6-luna") "fresh-1"))
+          (slopchat-cache-summary-thread connection "/tmp" "Stable" [] "gpt-6-luna")
+          (should (eq (car anchors) (cadr anchors)))
+          (slopchat-cache-summary-thread connection "/tmp" "Changed" [] "gpt-6-luna")
+          (should-not (eq (car anchors) (cadr anchors)))
+          (should (equal (plist-get slopchat-cache-thread-provenance :route) "empty-fork")))
+      (slopchat-cache--close-connection connection)
+      (delete-process process))
+    (dolist (anchor anchors) (should-not (file-exists-p (slopchat-cache-anchor-path anchor))))))
+
+(ert-deftest slopchat-cache-summary-fallback-keeps-original-settings ()
+  (let* ((process (make-pipe-process :name "cache-fallback-test" :noquery t))
+         (connection (slopchat--connection-create :process process)) seen)
+    (unwind-protect
+        (cl-letf (((symbol-function 'slopchat-cache-runtime-version) (lambda (_) (error "Unsupported runtime")))
+                  ((symbol-function 'slopchat-codex-thread)
+                   (lambda (_ directory instructions tools model)
+                     (setq seen (list directory instructions tools model)) "fallback")))
+          (should (equal (slopchat-cache-summary-thread connection "/tmp" "Stable" [] "gpt-6-luna") "fallback"))
+          (should (equal seen '("/tmp" "Stable" [] "gpt-6-luna")))
+          (should (equal (plist-get slopchat-cache-thread-provenance :route) "thread/start-fallback")))
+      (delete-process process))))
+
+(ert-deftest slopchat-cache-inspector-reads-captured-anchor-tools ()
+  (let ((snapshot (list :payload
+                        (list (list :method "thread/fork" :params '(:baseInstructions "Stable")
+                                    :anchorMetadata (list :dynamicTools slopchat-model-eval-tools))))))
+    (should (equal (slopchat-ui--context-section snapshot "instructions") "Stable"))
+    (should (equal (slopchat-ui--context-section snapshot "tools") slopchat-model-eval-tools))))

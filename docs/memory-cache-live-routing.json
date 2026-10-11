@@ -1,0 +1,488 @@
+{
+  "kind": "live-correctness-and-routing-observation",
+  "samples": [
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:659",
+      "node": [
+        3,
+        864
+      ],
+      "thread": "01a1291d-7901-7311-8014-0a10a21e87a6",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 3,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 17490,
+          "cached-input": 16128,
+          "output": 105,
+          "reasoning-output": 0,
+          "total": 17595,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 51563,
+          "cached-input": 48384,
+          "output": 387,
+          "reasoning-output": 21,
+          "total": 51950,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:658",
+      "node": [
+        3,
+        864
+      ],
+      "thread": "01a1291d-7901-7311-8014-0a10a21e87a6",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 2,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 17197,
+          "cached-input": 16128,
+          "output": 127,
+          "reasoning-output": 0,
+          "total": 17324,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 34073,
+          "cached-input": 32256,
+          "output": 282,
+          "reasoning-output": 21,
+          "total": 34355,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:657",
+      "node": [
+        3,
+        864
+      ],
+      "thread": "01a1291d-7901-7311-8014-0a10a21e87a6",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 1,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 16876,
+          "cached-input": 16128,
+          "output": 155,
+          "reasoning-output": 21,
+          "total": 17031,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 16876,
+          "cached-input": 16128,
+          "output": 155,
+          "reasoning-output": 21,
+          "total": 17031,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:656",
+      "node": [
+        2,
+        1729
+      ],
+      "thread": "01a1291d-4eda-7513-8695-c7f1dd2af209",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 3,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 17421,
+          "cached-input": 16128,
+          "output": 89,
+          "reasoning-output": 0,
+          "total": 17510,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 51396,
+          "cached-input": 48384,
+          "output": 348,
+          "reasoning-output": 16,
+          "total": 51744,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:655",
+      "node": [
+        2,
+        1729
+      ],
+      "thread": "01a1291d-4eda-7513-8695-c7f1dd2af209",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 2,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 17145,
+          "cached-input": 16128,
+          "output": 110,
+          "reasoning-output": 0,
+          "total": 17255,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 33975,
+          "cached-input": 32256,
+          "output": 259,
+          "reasoning-output": 16,
+          "total": 34234,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:654",
+      "node": [
+        2,
+        1729
+      ],
+      "thread": "01a1291d-4eda-7513-8695-c7f1dd2af209",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 1,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 16830,
+          "cached-input": 16128,
+          "output": 149,
+          "reasoning-output": 16,
+          "total": 16979,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 16830,
+          "cached-input": 16128,
+          "output": 149,
+          "reasoning-output": 16,
+          "total": 16979,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:653",
+      "node": [
+        1,
+        3459
+      ],
+      "thread": "01a1291d-3196-7552-8680-6b7e1107c625",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 4,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 17677,
+          "cached-input": 17152,
+          "output": 93,
+          "reasoning-output": 0,
+          "total": 17770,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 68992,
+          "cached-input": 65536,
+          "output": 490,
+          "reasoning-output": 0,
+          "total": 69482,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:652",
+      "node": [
+        1,
+        3459
+      ],
+      "thread": "01a1291d-3196-7552-8680-6b7e1107c625",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 3,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 17396,
+          "cached-input": 16128,
+          "output": 119,
+          "reasoning-output": 0,
+          "total": 17515,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 51315,
+          "cached-input": 48384,
+          "output": 397,
+          "reasoning-output": 0,
+          "total": 51712,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:651",
+      "node": [
+        1,
+        3459
+      ],
+      "thread": "01a1291d-3196-7552-8680-6b7e1107c625",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 2,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 17115,
+          "cached-input": 16128,
+          "output": 123,
+          "reasoning-output": 0,
+          "total": 17238,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 33919,
+          "cached-input": 32256,
+          "output": 278,
+          "reasoning-output": 0,
+          "total": 34197,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:650",
+      "node": [
+        1,
+        3459
+      ],
+      "thread": "01a1291d-3196-7552-8680-6b7e1107c625",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 1,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 16804,
+          "cached-input": 16128,
+          "output": 155,
+          "reasoning-output": 0,
+          "total": 16959,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 16804,
+          "cached-input": 16128,
+          "output": 155,
+          "reasoning-output": 0,
+          "total": 16959,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:649",
+      "node": [
+        0,
+        6919
+      ],
+      "thread": "01a1291d-143a-7391-acab-15f64f3837dd",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 4,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 17605,
+          "cached-input": 17152,
+          "output": 106,
+          "reasoning-output": 0,
+          "total": 17711,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 68632,
+          "cached-input": 52224,
+          "output": 495,
+          "reasoning-output": 0,
+          "total": 69127,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:648",
+      "node": [
+        0,
+        6919
+      ],
+      "thread": "01a1291d-143a-7391-acab-15f64f3837dd",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 3,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 17310,
+          "cached-input": 16128,
+          "output": 122,
+          "reasoning-output": 0,
+          "total": 17432,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 51027,
+          "cached-input": 35072,
+          "output": 389,
+          "reasoning-output": 0,
+          "total": 51416,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:647",
+      "node": [
+        0,
+        6919
+      ],
+      "thread": "01a1291d-143a-7391-acab-15f64f3837dd",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 2,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 17011,
+          "cached-input": 16128,
+          "output": 130,
+          "reasoning-output": 0,
+          "total": 17141,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 33717,
+          "cached-input": 18944,
+          "output": 267,
+          "reasoning-output": 0,
+          "total": 33984,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:646",
+      "node": [
+        0,
+        6919
+      ],
+      "thread": "01a1291d-143a-7391-acab-15f64f3837dd",
+      "anchor": "a394af74-604a-4a4e-8231-a60cc980c9b9",
+      "runtime": "v2",
+      "attempt": 1,
+      "terminal": true,
+      "metrics": {
+        "last": {
+          "input": 16706,
+          "cached-input": 2816,
+          "output": 137,
+          "reasoning-output": 0,
+          "total": 16843,
+          "cache-write-input": 0
+        },
+        "total": {
+          "input": 16706,
+          "cached-input": 2816,
+          "output": 137,
+          "reasoning-output": 0,
+          "total": 16843,
+          "cache-write-input": 0
+        },
+        "context-limit": 258400
+      }
+    }
+  ],
+  "status": {
+    "count": 6920,
+    "cursor": 6920,
+    "working": false,
+    "summaryActive": 0,
+    "summaryFailed": 0,
+    "memoryUsage": {
+      "started": 21,
+      "input": 357845,
+      "output": 2602,
+      "inputObserved": 21,
+      "outputObserved": 21,
+      "cachedInput": 270080,
+      "cachedInputObserved": 21,
+      "cacheWriteInput": 0,
+      "cacheWriteInputObserved": 21,
+      "since": 1791686059.7322056,
+      "legacy": {
+        "started": 1128,
+        "input": 17775344,
+        "output": 127211,
+        "inputObserved": 1128,
+        "outputObserved": 1128
+      }
+    }
+  },
+  "claimLimit": "Actual production observations, including correction retries. Not a new controlled A/B or long-term savings proof.",
+  "verification": {
+    "capturedToolsMatchProduction": true,
+    "capturedInstructionsAvailable": true,
+    "fourIndependentThreadsOneAnchor": true,
+    "firstAttemptDistinctFromRetries": true,
+    "activation": {
+      "pid": 3408388,
+      "count": 6919,
+      "cursor": 6919,
+      "viewPreserved": true,
+      "compactionViewPreserved": true,
+      "ledgerPreserved": true
+    },
+    "newSummaryWork": {
+      "attempts": 14,
+      "input": 240583,
+      "cachedInput": 214528,
+      "uncachedInput": 26055,
+      "output": 1720,
+      "coverage": 14
+    }
+  }
+}

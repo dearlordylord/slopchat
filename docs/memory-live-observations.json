@@ -1,0 +1,174 @@
+{
+  "observedAt": "2026-10-11T02:36:12.741770+00:00",
+  "serverPid": 3408388,
+  "tuiPid": 2480392,
+  "status": {
+    "count": 6915,
+    "cursor": 6915,
+    "working": false,
+    "summaryActive": 0,
+    "summaryFailed": 0,
+    "memoryUsage": {
+      "started": 4,
+      "input": 66833,
+      "output": 540,
+      "inputObserved": 4,
+      "outputObserved": 4,
+      "cachedInput": 35840,
+      "cachedInputObserved": 4,
+      "cacheWriteInput": 0,
+      "cacheWriteInputObserved": 4,
+      "since": 1791686059.7322056,
+      "legacy": {
+        "started": 1128,
+        "input": 17775344,
+        "output": 127211,
+        "inputObserved": 1128,
+        "outputObserved": 1128
+      }
+    }
+  },
+  "selection": "Most recent 20 retained calls, filtered to compaction snapshots after activation",
+  "summaries": [
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:640",
+      "attempt": 3,
+      "outcome": "completed",
+      "terminal": true,
+      "thread": "01a128d0-cf7f-76d0-b58b-840adfb67209",
+      "node": [
+        0,
+        6914
+      ],
+      "model": "gpt-6-luna",
+      "observation": {
+        "source": "codex",
+        "receivedAt": 1791686143.0354767,
+        "metrics": {
+          "last": {
+            "input": 17229,
+            "cached-input": 16128,
+            "output": 153,
+            "reasoning-output": 0,
+            "total": 17382,
+            "cache-write-input": 0
+          },
+          "total": {
+            "input": 50504,
+            "cached-input": 34048,
+            "output": 508,
+            "reasoning-output": 0,
+            "total": 51012,
+            "cache-write-input": 0
+          },
+          "context-limit": 258400
+        }
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:639",
+      "attempt": 2,
+      "outcome": "completed",
+      "terminal": true,
+      "thread": "01a128d0-cf7f-76d0-b58b-840adfb67209",
+      "node": [
+        0,
+        6914
+      ],
+      "model": "gpt-6-luna",
+      "observation": {
+        "source": "codex",
+        "receivedAt": 1791686140.716971,
+        "metrics": {
+          "last": {
+            "input": 16841,
+            "cached-input": 16128,
+            "output": 170,
+            "reasoning-output": 0,
+            "total": 17011,
+            "cache-write-input": 0
+          },
+          "total": {
+            "input": 33275,
+            "cached-input": 17920,
+            "output": 355,
+            "reasoning-output": 0,
+            "total": 33630,
+            "cache-write-input": 0
+          },
+          "context-limit": 258400
+        }
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:638",
+      "attempt": 1,
+      "outcome": "completed",
+      "terminal": true,
+      "thread": "01a128d0-cf7f-76d0-b58b-840adfb67209",
+      "node": [
+        0,
+        6914
+      ],
+      "model": "gpt-6-luna",
+      "observation": {
+        "source": "codex",
+        "receivedAt": 1791686138.7348742,
+        "metrics": {
+          "last": {
+            "input": 16434,
+            "cached-input": 1792,
+            "output": 185,
+            "reasoning-output": 0,
+            "total": 16619,
+            "cache-write-input": 0
+          },
+          "total": {
+            "input": 16434,
+            "cached-input": 1792,
+            "output": 185,
+            "reasoning-output": 0,
+            "total": 16619,
+            "cache-write-input": 0
+          },
+          "context-limit": 258400
+        }
+      }
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:636",
+      "attempt": 1,
+      "outcome": "completed",
+      "terminal": true,
+      "thread": "01a128d0-3f88-7820-8f5b-de55cbbfe35c",
+      "node": [
+        0,
+        6912
+      ],
+      "model": "gpt-6-luna",
+      "observation": {
+        "source": "codex",
+        "receivedAt": 1791686101.7552078,
+        "metrics": {
+          "last": {
+            "input": 16329,
+            "cached-input": 1792,
+            "output": 32,
+            "reasoning-output": 0,
+            "total": 16361,
+            "cache-write-input": 0
+          },
+          "total": {
+            "input": 16329,
+            "cached-input": 1792,
+            "output": 32,
+            "reasoning-output": 0,
+            "total": 16361,
+            "cache-write-input": 0
+          },
+          "context-limit": 258400
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "model": "gpt-6-luna",
+  "runtimeVersion": "v2",
+  "modelCalls": 1,
+  "thread": "01a12919-2315-7640-902d-cf3590f7ca95",
+  "emptyHistory": true,
+  "toolsExecuted": 0,
+  "inputSha256": "b11d767bda77f2cdaaa1de460fb354866dd1ea83b31457ffb48c4c379941910b",
+  "instructionsSha256": "2e46253646e5ce6ae398b42eb0d19e336add1cabc40c57e4d79dc392e47abee7",
+  "output": "Orion: port 4317; mode read-only; retries 0.",
+  "usage": {
+    "total": {
+      "totalTokens": 35221,
+      "inputTokens": 35201,
+      "cachedInputTokens": 34560,
+      "cacheWriteInputTokens": 0,
+      "outputTokens": 20,
+      "reasoningOutputTokens": 0
+    },
+    "last": {
+      "totalTokens": 35221,
+      "inputTokens": 35201,
+      "cachedInputTokens": 34560,
+      "cacheWriteInputTokens": 0,
+      "outputTokens": 20,
+      "reasoningOutputTokens": 0
+    },
+    "modelContextWindow": 258400
+  },
+  "kind": "ordinary-correctness-smoke-after-runtime-fix",
+  "claimLimit": "One corrected summary proves observed token parity for the identical tested input, not a new repeated improvement study.",
+  "sourceSha256": {
+    "lisp/slopchat-cache-candidate.el": "c8ea5e69112f18d804e7549521dd775a34604c0516931e5b4a03039867ee345e",
+    "lisp/slopchat.el": "cf9a6e26c09d1d5158b9f89ab22c3f8cc90031dbddcfc5d406005530955fd08d",
+    "lisp/slopchat-ui.el": "fd0993b18799a2a60417203f892b1b2dbc429fdf3f06d725dc2eb832fd6990a2"
+  }
+}

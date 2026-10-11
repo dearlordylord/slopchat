@@ -9,6 +9,12 @@
     :description "Request evaluation of one Emacs Lisp expression by the Lisp agent."
     :inputSchema (:type "object" :properties (:expression (:type "string"))
                   :required ["expression"] :additionalProperties :false))])
+(defun slopchat-model-instructions (instructions)
+  (concat instructions "\nYou are a model adapter for an external Lisp agent.\n"
+                          "Continue the supplied conversation; its tool_result blocks are actual host results.\n"
+                          "Request eval when needed. Do not implement an internal tool loop.\n"))
+(defun slopchat-model-input (messages)
+  (concat "Conversation (Emacs Lisp data):\n" (prin1-to-string messages)))
 (defun slopchat-model-response (connection directory instructions messages model &optional on-run pump on-event)
   "Return Ouro content blocks for MESSAGES without executing requested tools.
 App Server is interrupted at the first tool boundary. Each response uses a
@@ -35,9 +41,7 @@ fresh thread; continuation history is supplied explicitly by the Lisp agent."
                             (slopchat-run-context-id prepared-run) snapshot))))))))
          (thread (condition-case err (slopchat-codex-thread
                   connection directory
-                  (concat instructions "\nYou are a model adapter for an external Lisp agent.\n"
-                          "Continue the supplied conversation; its tool_result blocks are actual host results.\n"
-                          "Request eval when needed. Do not implement an internal tool loop.\n")
+                  (slopchat-model-instructions instructions)
                   slopchat-model-eval-tools model)
                    (error
                     ;; Preserve only requests actually prepared before rejection.
@@ -47,7 +51,7 @@ fresh thread; continuation history is supplied explicitly by the Lisp agent."
                         (slopchat-context-finish slopchat-model-context-store id 'failed)))
                     (signal (car err) (cdr err)))))
          (run (slopchat-codex-run connection thread
-                                     (concat "Conversation (Emacs Lisp data):\n" (prin1-to-string messages))
+                                     (slopchat-model-input messages)
                                      nil on-event nil 'model))
          content)
     (setf (slopchat-run-deferred run) t
@@ -92,7 +96,8 @@ fresh thread; continuation history is supplied explicitly by the Lisp agent."
       (slopchat-codex-forget-thread connection thread))))
 (defun slopchat-model-summary (connection thread prompt callback)
   "Start one tool-free summary response; retry policy belongs to memory."
-  (slopchat-codex-run connection thread prompt
+  (slopchat-codex-run connection thread
+                     (slopchat-model-input (vector (list :role "user" :content prompt)))
                      (lambda (&rest _) (error "Summary model cannot execute tools"))
                      nil callback 'compaction))
 (defun slopchat-model-default (messages)

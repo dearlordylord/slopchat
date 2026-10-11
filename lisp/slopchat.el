@@ -3,6 +3,7 @@
 (require 'slopchat-codex)
 (require 'slopchat-prompt)
 (require 'slopchat-model)
+(require 'slopchat-cache-candidate)
 (require 'slopchat-process)
 (load (expand-file-name "../boot.el" (file-name-directory load-file-name)) nil t)
 (defvar slopchat-current-chat nil "Chat visible to the self-developed Lisp agent.")
@@ -25,7 +26,7 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
 (defvar slopchat--open-chats nil)
 (defvar slopchat-last-thread nil "Thread ID of the last user turn, for diagnostics.")
 (cl-defstruct (slopchat-summary (:constructor slopchat--summary-create))
-  key source context thread (attempts 0) shortest finished)
+  key source context context-view thread provider-request history (usage-state (list :totals nil)) (attempts 0) shortest finished)
 (cl-defstruct (slopchat-input (:constructor slopchat--input-create)) text first callback steer)
 
 (defun slopchat--record-input-error (chat input error)
@@ -36,6 +37,9 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
 
 (defun slopchat--instructions ()
   (concat slopchat-system-prompt "\n\n# User instructions\n" slopchat-user-instructions))
+(defun slopchat--provider-instructions ()
+  (concat (slopchat--instructions)
+                                 "\nYour only provider tool is eval. Memory is available as Lisp (zoom ID N PAGE) and (date ID).\n"))
 (defun slopchat--connection (chat)
   (unless (slopchat-chat-transport chat)
     (setf (slopchat-chat-transport chat) (slopchat-codex-open))
@@ -58,12 +62,13 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
                              (append (visit (list level index))
                                      (visit (list level (1+ index))))))))))
     (cl-mapcan #'visit (copy-sequence view))))
-(defun slopchat--context (chat key)
+(defun slopchat--context-view (chat key)
   (let* ((range (slopchat-range key))
-         (end (if (= (car key) 0) (car range) (+ (car range) (cdr range))))
-         (prefix (slopchat--prefix chat (slopchat-chat-comp-view chat)
-                                   (min end (slopchat-chat-cursor chat)))))
-    (slopchat-render chat prefix)))
+         (end (if (= (car key) 0) (car range) (+ (car range) (cdr range)))))
+    (slopchat--prefix chat (slopchat-chat-comp-view chat)
+                      (min end (slopchat-chat-cursor chat)))))
+(defun slopchat--context (chat key)
+  (slopchat-render chat (slopchat--context-view chat key)))
 (defun slopchat--compaction-task (_chat job)
   (let* ((key (slopchat-summary-key job)) (range (slopchat-range key))
          (first (car range)) (span (cdr range)))
@@ -110,15 +115,45 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
       (funcall slopchat-summary-function chat (slopchat-summary-key job) prompt
                (slopchat-summary-context job)
                (lambda (text error) (slopchat--summary-reply chat job text error)))
-    (let* ((ledger (slopchat-memory-usage-ledger chat))
+    (let* ((store (slopchat-chat-context chat))
+           (snapshot nil)
+           (slopchat-codex-request-observer
+            (lambda (method params)
+              (when (equal method "turn/start")
+                (setq snapshot
+                      (slopchat-context-capture
+                       store (list (slopchat-summary-provider-request job)
+                                   (list :method method :params params))
+                       (list :kind 'compaction :node (slopchat-summary-key job)
+                             :thread (slopchat-summary-thread job) :model slopchat-summary-model
+                             :cache-route (plist-get (plist-get (slopchat-summary-provider-request job) :anchorMetadata) :route)
+                             :cache-anchor (plist-get (plist-get (slopchat-summary-provider-request job) :anchorMetadata) :anchorId)
+                             :cache-runtime (plist-get (plist-get (slopchat-summary-provider-request job) :anchorMetadata) :runtimeVersion)
+                             :attempt (slopchat-summary-attempts job)
+                             :memory-prefix (slopchat-summary-context-view job)
+                             :prior-turns (reverse (slopchat-summary-history job)))))
+                (slopchat-context-event store snapshot
+                                        (list :kind 'submission :state 'prepared :prepared-at (float-time)))
+                (let ((run (gethash (plist-get params :threadId)
+                                    (slopchat-connection-runs (slopchat--connection chat)))))
+                  (when run
+                    (setf (slopchat-run-context-store run) store
+                          (slopchat-run-context-id run) snapshot))))))
+           (ledger (slopchat-memory-usage-ledger chat))
            (attempt (gensym))
            (slopchat-codex-memory-attempt
-            (list :memory-ledger ledger :memory-attempt attempt)))
+            (list :memory-ledger ledger :memory-attempt attempt
+                  :memory-thread-state (slopchat-summary-usage-state job))))
       (slopchat-memory-usage-start ledger attempt)
       (slopchat-model-summary
        (slopchat--connection chat) (slopchat-summary-thread job) prompt
-       (lambda (run) (slopchat--summary-reply chat job (slopchat-codex-result run)
-                                             (slopchat-run-error run)))))))
+       (lambda (run)
+         (let ((text (slopchat-codex-result run)))
+           (when snapshot
+             (slopchat-context-finish store snapshot (if (slopchat-run-error run) 'failed 'completed)))
+           (push (list :request prompt :response text :error (slopchat-run-error run))
+                 (slopchat-summary-history job))
+           (slopchat--summary-reply chat job text (slopchat-run-error run))))))))
 
 (defun slopchat-schedule (chat)
   "Start ready queued nodes, never scan the tree for work."
@@ -130,14 +165,25 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
           (puthash key 'active (slopchat-chat-states chat))
           (cl-incf (slopchat-chat-active chat))
           (let ((job (slopchat--summary-create :key key :source (slopchat-source chat key)
-                                              :context (slopchat--context chat key))))
+                                              :context (slopchat--context chat key)
+                                              :context-view (copy-tree (slopchat--context-view chat key)))))
             (condition-case err
                 (progn
                   (unless slopchat-summary-function
-                    (setf (slopchat-summary-thread job)
-                          (slopchat-codex-thread (slopchat--connection chat)
+                    (let ((slopchat-codex-request-observer
+                           (lambda (method params)
+                             (when (member method '("thread/start" "thread/fork"))
+                               (setf (slopchat-summary-provider-request job)
+                                     (slopchat-context-copy (list :method method :params params)))))))
+                     (setf (slopchat-summary-thread job)
+                          (slopchat-cache-summary-thread (slopchat--connection chat)
                                                 (slopchat-chat-directory chat)
-                                                (slopchat--instructions) [] slopchat-summary-model)))
+                                                (slopchat-model-instructions (slopchat--provider-instructions))
+                                                slopchat-model-eval-tools slopchat-summary-model))
+                     (when slopchat-cache-thread-provenance
+                       (setf (slopchat-summary-provider-request job)
+                             (plist-put (slopchat-summary-provider-request job) :anchorMetadata
+                                        (slopchat-context-copy slopchat-cache-thread-provenance))))))
                   (slopchat--summary-attempt chat job (slopchat--compaction-task chat job)))
               (error (slopchat--summary-finish chat job nil (error-message-string err))))))))))
 (defun slopchat-pump (chat &optional wait)
@@ -282,8 +328,7 @@ DONE receives (TEXT ERROR). Production uses Codex threads and automatic retries.
                     (unwind-protect
                         (slopchat-model-response
                          connection (slopchat-chat-directory chat)
-                         (concat (slopchat--instructions)
-                                 "\nYour only provider tool is eval. Memory is available as Lisp (zoom ID N PAGE) and (date ID).\n")
+                         (slopchat--provider-instructions)
                          messages slopchat-turn-model
                          (lambda (run)
                            (setq slopchat-last-thread (slopchat-run-thread run)

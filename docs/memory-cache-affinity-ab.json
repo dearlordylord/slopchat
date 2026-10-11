@@ -1,0 +1,334 @@
+{
+  "started": 1791690187.2682583,
+  "model": "gpt-6-luna",
+  "callsReserved": 8,
+  "rows": [
+    {
+      "arm": "A",
+      "pair": 0,
+      "thread": "01a1290e-a4bc-7320-8cd3-308d7676390b",
+      "turn": "01a1290e-a5a6-7ee2-9699-f745b13de778",
+      "inputSha256": "b11d767bda77f2cdaaa1de460fb354866dd1ea83b31457ffb48c4c379941910b",
+      "instructionsSha256": "2e46253646e5ce6ae398b42eb0d19e336add1cabc40c57e4d79dc392e47abee7",
+      "emptyHistory": true,
+      "toolsExecuted": 0,
+      "output": "user: Orion: port 4317; mode read-only; retries 0.",
+      "expected": "Orion: port 4317; mode read-only; retries 0.",
+      "error": null,
+      "usage": {
+        "input": 35201,
+        "cached-input": 1792,
+        "output": 21,
+        "reasoning-output": 0,
+        "total": 35222,
+        "cache-write-input": 0
+      },
+      "rawUsage": {
+        "total": {
+          "totalTokens": 35222,
+          "inputTokens": 35201,
+          "cachedInputTokens": 1792,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 21,
+          "reasoningOutputTokens": 0
+        },
+        "last": {
+          "totalTokens": 35222,
+          "inputTokens": 35201,
+          "cachedInputTokens": 1792,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 21,
+          "reasoningOutputTokens": 0
+        },
+        "modelContextWindow": 258400
+      }
+    },
+    {
+      "arm": "B",
+      "pair": 0,
+      "thread": "01a1290f-8d23-7f60-8b5f-9ba87161ad01",
+      "turn": "01a1290f-8d59-74a2-a0d2-2620567c8cf6",
+      "inputSha256": "b11d767bda77f2cdaaa1de460fb354866dd1ea83b31457ffb48c4c379941910b",
+      "instructionsSha256": "2e46253646e5ce6ae398b42eb0d19e336add1cabc40c57e4d79dc392e47abee7",
+      "emptyHistory": true,
+      "toolsExecuted": 0,
+      "output": "Orion: port 4317; mode read-only; retries 0.",
+      "expected": "Orion: port 4317; mode read-only; retries 0.",
+      "error": null,
+      "usage": {
+        "input": 33105,
+        "cached-input": 1792,
+        "output": 20,
+        "reasoning-output": 0,
+        "total": 33125,
+        "cache-write-input": 0
+      },
+      "rawUsage": {
+        "total": {
+          "totalTokens": 33125,
+          "inputTokens": 33105,
+          "cachedInputTokens": 1792,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "last": {
+          "totalTokens": 33125,
+          "inputTokens": 33105,
+          "cachedInputTokens": 1792,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "modelContextWindow": 258400
+      }
+    },
+    {
+      "arm": "B",
+      "pair": 1,
+      "thread": "01a1290f-953c-7fc2-bd6c-6df8723869aa",
+      "turn": "01a1290f-955b-7fe2-8775-cdae3dedf27d",
+      "inputSha256": "09090159b671db536a2b8ceb6198794adfe036210f7edeaf992c44497fe54b64",
+      "instructionsSha256": "2e46253646e5ce6ae398b42eb0d19e336add1cabc40c57e4d79dc392e47abee7",
+      "emptyHistory": true,
+      "toolsExecuted": 0,
+      "output": "Orion: port 4318; mode read-only; retries 0.",
+      "expected": "Orion: port 4318; mode read-only; retries 0.",
+      "error": null,
+      "usage": {
+        "input": 33105,
+        "cached-input": 32512,
+        "output": 20,
+        "reasoning-output": 0,
+        "total": 33125,
+        "cache-write-input": 0
+      },
+      "rawUsage": {
+        "total": {
+          "totalTokens": 33125,
+          "inputTokens": 33105,
+          "cachedInputTokens": 32512,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "last": {
+          "totalTokens": 33125,
+          "inputTokens": 33105,
+          "cachedInputTokens": 32512,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "modelContextWindow": 258400
+      }
+    },
+    {
+      "arm": "A",
+      "pair": 1,
+      "thread": "01a1290f-9c05-78b3-9c9b-19cf96b3c333",
+      "turn": "01a1290f-9c8c-79f0-aee5-65338ad6f19d",
+      "inputSha256": "09090159b671db536a2b8ceb6198794adfe036210f7edeaf992c44497fe54b64",
+      "instructionsSha256": "2e46253646e5ce6ae398b42eb0d19e336add1cabc40c57e4d79dc392e47abee7",
+      "emptyHistory": true,
+      "toolsExecuted": 0,
+      "output": "Orion: port 4318; mode read-only; retries 0.",
+      "expected": "Orion: port 4318; mode read-only; retries 0.",
+      "error": null,
+      "usage": {
+        "input": 35201,
+        "cached-input": 0,
+        "output": 20,
+        "reasoning-output": 0,
+        "total": 35221,
+        "cache-write-input": 0
+      },
+      "rawUsage": {
+        "total": {
+          "totalTokens": 35221,
+          "inputTokens": 35201,
+          "cachedInputTokens": 0,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "last": {
+          "totalTokens": 35221,
+          "inputTokens": 35201,
+          "cachedInputTokens": 0,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "modelContextWindow": 258400
+      }
+    },
+    {
+      "arm": "A",
+      "pair": 2,
+      "thread": "01a1290f-a454-7493-97af-14d86cf92736",
+      "turn": "01a1290f-a4f1-7d33-ae83-988b3ca296ec",
+      "inputSha256": "4acd50bd62b59b6abf64c0269a25331fdbe45281931124ceb0294d79bb783565",
+      "instructionsSha256": "2e46253646e5ce6ae398b42eb0d19e336add1cabc40c57e4d79dc392e47abee7",
+      "emptyHistory": true,
+      "toolsExecuted": 0,
+      "output": "Orion: port 4319; mode read-only; retries 0.",
+      "expected": "Orion: port 4319; mode read-only; retries 0.",
+      "error": null,
+      "usage": {
+        "input": 35201,
+        "cached-input": 34560,
+        "output": 20,
+        "reasoning-output": 0,
+        "total": 35221,
+        "cache-write-input": 0
+      },
+      "rawUsage": {
+        "total": {
+          "totalTokens": 35221,
+          "inputTokens": 35201,
+          "cachedInputTokens": 34560,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "last": {
+          "totalTokens": 35221,
+          "inputTokens": 35201,
+          "cachedInputTokens": 34560,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "modelContextWindow": 258400
+      }
+    },
+    {
+      "arm": "B",
+      "pair": 2,
+      "thread": "01a1290f-adcb-7372-84d7-bdb3acef706b",
+      "turn": "01a1290f-ade1-7af3-99c5-bb3575efea2b",
+      "inputSha256": "4acd50bd62b59b6abf64c0269a25331fdbe45281931124ceb0294d79bb783565",
+      "instructionsSha256": "2e46253646e5ce6ae398b42eb0d19e336add1cabc40c57e4d79dc392e47abee7",
+      "emptyHistory": true,
+      "toolsExecuted": 0,
+      "output": "Orion: port 4319; mode read-only; retries 0.",
+      "expected": "Orion: port 4319; mode read-only; retries 0.",
+      "error": null,
+      "usage": {
+        "input": 33105,
+        "cached-input": 32512,
+        "output": 20,
+        "reasoning-output": 0,
+        "total": 33125,
+        "cache-write-input": 0
+      },
+      "rawUsage": {
+        "total": {
+          "totalTokens": 33125,
+          "inputTokens": 33105,
+          "cachedInputTokens": 32512,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "last": {
+          "totalTokens": 33125,
+          "inputTokens": 33105,
+          "cachedInputTokens": 32512,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "modelContextWindow": 258400
+      }
+    },
+    {
+      "arm": "B",
+      "pair": 3,
+      "thread": "01a1290f-b4c7-7700-8f30-23a296d746af",
+      "turn": "01a1290f-b4cf-7f02-8361-3cbb83d8182c",
+      "inputSha256": "0735a35ee1c2b2a830b2cd7ed9ca76ccb04363be0ca8a532890b21e037b93323",
+      "instructionsSha256": "2e46253646e5ce6ae398b42eb0d19e336add1cabc40c57e4d79dc392e47abee7",
+      "emptyHistory": true,
+      "toolsExecuted": 0,
+      "output": "Orion: port 4320; mode read-only; retries 0.",
+      "expected": "Orion: port 4320; mode read-only; retries 0.",
+      "error": null,
+      "usage": {
+        "input": 33105,
+        "cached-input": 32512,
+        "output": 20,
+        "reasoning-output": 0,
+        "total": 33125,
+        "cache-write-input": 0
+      },
+      "rawUsage": {
+        "total": {
+          "totalTokens": 33125,
+          "inputTokens": 33105,
+          "cachedInputTokens": 32512,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "last": {
+          "totalTokens": 33125,
+          "inputTokens": 33105,
+          "cachedInputTokens": 32512,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "modelContextWindow": 258400
+      }
+    },
+    {
+      "arm": "A",
+      "pair": 3,
+      "thread": "01a1290f-bc94-7182-b402-b42b8905b508",
+      "turn": "01a1290f-bd28-7112-b33e-f0c23b6df5f6",
+      "inputSha256": "0735a35ee1c2b2a830b2cd7ed9ca76ccb04363be0ca8a532890b21e037b93323",
+      "instructionsSha256": "2e46253646e5ce6ae398b42eb0d19e336add1cabc40c57e4d79dc392e47abee7",
+      "emptyHistory": true,
+      "toolsExecuted": 0,
+      "output": "Orion: port 4320; mode read-only; retries 0.",
+      "expected": "Orion: port 4320; mode read-only; retries 0.",
+      "error": null,
+      "usage": {
+        "input": 35201,
+        "cached-input": 1792,
+        "output": 20,
+        "reasoning-output": 0,
+        "total": 35221,
+        "cache-write-input": 0
+      },
+      "rawUsage": {
+        "total": {
+          "totalTokens": 35221,
+          "inputTokens": 35201,
+          "cachedInputTokens": 1792,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "last": {
+          "totalTokens": 35221,
+          "inputTokens": 35201,
+          "cachedInputTokens": 1792,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 20,
+          "reasoningOutputTokens": 0
+        },
+        "modelContextWindow": 258400
+      }
+    }
+  ],
+  "decision": "reject-current-candidate-for-production",
+  "decisionReason": "Provider input totals differ by 2096 tokens for identical local pair inputs; effective context/tool parity unproven; synthetic workload only.",
+  "executionIds": [
+    "AB1",
+    "AB2"
+  ],
+  "repair": "First A response had valid user role prefix; offline validator repaired; retained first observation reassessed, only seven further calls, total eight."
+}
