@@ -7,17 +7,34 @@ import {useLayoutEffect,useState} from 'react'
 export function memoryTokenLabel(status:Status|undefined,draft=''){
  const metrics=(status?.contextCall?.lastReported?.observation??status?.contextCall?.observation)?.metrics
  const compact=(n:number|undefined)=>n===undefined?'unavailable':n>=1000?(n/1000).toFixed(1)+'k':String(n)
+ const input=metrics?.last?.input
+ const cached=metrics?.last?.['cached-input']
+ const valid=(n:number|undefined):n is number=>n!==undefined&&Number.isFinite(n)&&n>=0
+ const fresh=valid(input)&&valid(cached)&&cached<=input?input-cached:undefined
  const basis=status?.nextBasis
  const escaped=Array.from(draft).reduce((n,c)=>n+([String.fromCharCode(34),String.fromCharCode(92),String.fromCharCode(10)].includes(c)?2:1),0)
  const total=basis?Math.ceil(basis.instructions/4)+Math.ceil(basis.tools/4)+Math.ceil((basis.input+escaped)/4):undefined
- return 'Context · last '+compact(metrics?.last?.input)+' / '+compact(metrics?.['context-limit'])+' · next '+(total===undefined?'unavailable':'~'+compact(total))
+ return 'Context · last '+compact(input)+' input / '+compact(fresh)+' new / '+compact(valid(cached)?cached:undefined)+' cached / '+compact(metrics?.['context-limit'])+' limit'+' · next '+(total===undefined?'unavailable':'~'+compact(total))
 }
 /** Session summary-work totals; missing observations are not zero. */
 export function memoryWorkLabel(status:Status|undefined){
  const u=status?.memoryUsage
- if(!u)return 'Memory unavailable'
+ if(!u)return 'Memory Σ unavailable'
  const compact=(n:number)=>n>=1000?(n/1000).toFixed(1)+'k':String(n)
- return 'Memory '+(u.inputObserved?compact(u.input):'unavailable')+' in / '+(u.outputObserved?compact(u.output):'unavailable')+' out'+(u.inputObserved<u.started||u.outputObserved<u.started?' · partial':'')
+ const cachedObserved=u.cachedInputObserved??0
+ const complete=u.started>0&&u.inputObserved===u.started&&cachedObserved===u.started
+ const fresh=complete&&u.cachedInput!==undefined&&u.cachedInput<=u.input?u.input-u.cachedInput:undefined
+ return 'Memory Σ '+(fresh===undefined?(u.inputObserved?compact(u.input)+' input':'pending'):compact(fresh)+' new')+' / '+(cachedObserved&&u.cachedInput!==undefined?compact(u.cachedInput):'unavailable')+' cached / '+(u.outputObserved?compact(u.output):'unavailable')+' out'+(!complete||u.outputObserved<u.started?' · partial':'')
+}
+/** Color only observed numeric values; labels and missing data stay muted. */
+export function tokenLabelParts(label:string){
+ return label.split(/(\b[0-9]+(?:\.[0-9]+)?k?)(?= (?:new|cached)\b)/).map((text,index,parts)=>({
+  text,
+  color:index%2===1?(parts[index+1]?.startsWith(' new')?theme.tokenNew:theme.tokenCached):theme.muted,
+ }))
+}
+function TokenLabel({label}:{label:string}){
+ return <text fg={theme.muted}>{tokenLabelParts(label).map((part,index)=><span key={index} fg={part.color}>{part.text}</span>)}</text>
 }
 export const summaryFrames=['◐','◓','◑','◒'] as const
 function SummarySpinner(){
@@ -32,5 +49,5 @@ function SummarySpinner(){
  return <text fg={theme.agent}>{summaryFrames[frame]}</text>
 }
 export function MemoryActivityPrototype({status,draft=''}:{status:Status|undefined;draft?:string}){
- return <box id='memory-activity-prototype' flexDirection='row' height={1} flexShrink={0}><text fg={theme.muted}>{memoryTokenLabel(status,draft)} · {memoryWorkLabel(status)}</text>{status&&status.summaryActive>0?<><text> · </text><SummarySpinner/><text fg={theme.muted}>{' '+status.summaryActive}</text></>:null}{status&&status.summaryFailed>0?<text fg={theme.error}>{' · failed '+status.summaryFailed}</text>:null}</box>
+ return <box id='memory-activity-prototype' flexDirection='row' height={1} flexShrink={0}><TokenLabel label={memoryTokenLabel(status,draft)+' · '+memoryWorkLabel(status)}/>{status&&status.summaryActive>0?<><text> · </text><SummarySpinner/><text fg={theme.muted}>{' '+status.summaryActive}</text></>:null}{status&&status.summaryFailed>0?<text fg={theme.error}>{' · failed '+status.summaryFailed}</text>:null}</box>
 }
