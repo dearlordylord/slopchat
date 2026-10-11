@@ -97,3 +97,13 @@ The corrected path is now used by production summaries. One anchor is shared onl
 Live PID 3408388 activation preserved count/cursor 6919, both views and ledger identity. Four different real summary streams used one anchor. First-attempt cache rates: 16.86%, 95.98%, 95.83%, 95.57%. This is cross-thread reuse, not retry reuse. Four streams / 14 attempts (including normal corrections) reconciled to 240,583 input, 214,528 cached input, 26,055 uncached input and 1,720 output, coverage 14/14; active/failed summaries ended at zero. The factual maintenance note was appended via normal protocol; existing records were untouched.
 
 Full solution/alternatives/evidence: `docs/memory-cache-solution.md`, `docs/memory-cache-runtime-fix-smoke.json`, `docs/memory-cache-live-routing.json`. Combined relevant ERT 105/105; final focused cache tests 7/7; diff check passed. Original A/B evidence remains frozen and describes the old runtime-incomplete candidate. No new governed loop or production-savings guarantee is claimed. Remaining visibility limits: exact cached node boundaries and billed dollar cost are unavailable. No restart or commits.
+
+## Follow-up audit: 2026-10-11
+
+Isolated combined ERT including cache-candidate tests passed 126/126, zero unexpected, at 00:06:00-0400. Log: `/tmp/memory-followup-ert.log`. This reruns prefix/reopen, retry accounting and cache-routing regressions without restarting or reloading the live server.
+
+A read-only live observation found 35 reported empty-fork first attempts: 585,601 input and 466,176 cached input (79.61% aggregate reuse). This is a changing production workload, not a controlled comparison or a guarantee of the design percentage. Earlier warm-stream rates near 96% must not be generalized to all calls.
+
+One cumulative maximum per retained summary thread gave 38 threads, 1,389,777 input, 1,163,264 cached input and 10,694 output. At the same observation the session ledger reported 1,406,106 input, 1,165,056 cached input and 10,726 output; coverage 85/86 attempts. The difference is exactly 16,329 input, 1,792 cached input and 32 output: the previously recorded first post-activation leaf snapshot `:636`, now absent from retained snapshots. Adding that recorded observation reconciles all three counters exactly. Snapshot retention and lifetime accounting have different scopes; missing current telemetry is not zero. Legacy totals were preserved separately.
+
+No extra inference experiment, agent, restart, commit or canonical-memory rewrite was performed. Cached node boundaries and billed cost remain unavailable. Local contract regressions pass and observed accounting reconciles; steady-state cache-economy acceptance remains limited by workload-dependent hit rates.
