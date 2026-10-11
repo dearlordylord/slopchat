@@ -96,10 +96,27 @@ fresh thread; continuation history is supplied explicitly by the Lisp agent."
       (slopchat-codex-forget-thread connection thread))))
 (defun slopchat-model-summary (connection thread prompt callback)
   "Start one tool-free summary response; retry policy belongs to memory."
-  (slopchat-codex-run connection thread
-                     (slopchat-model-input (vector (list :role "user" :content prompt)))
-                     (lambda (&rest _) (error "Summary model cannot execute tools"))
-                     nil callback 'compaction))
+  (let (tool-requested)
+    (slopchat-codex-run
+     connection thread
+     (slopchat-model-input (vector (list :role "user" :content prompt)))
+     (lambda (tool &rest _)
+       (setq tool-requested t)
+       (let ((run (and (slopchat-connection-p connection)
+                       (gethash thread (slopchat-connection-runs connection)))))
+         (when (and run (slopchat-run-context-store run) (slopchat-run-context-id run))
+           (slopchat-context-event (slopchat-run-context-store run) (slopchat-run-context-id run)
+                                  (list :kind 'summary-tool-rejection :state 'rejected
+                                        :scope 'source-only :tool tool))))
+       (error "Summary model cannot execute tools"))
+     nil (lambda (run)
+           ;; A provider can continue after the rejected request. Its denial
+           ;; report is an inference failure, never a fact from the source.
+           (when tool-requested
+             (setf (slopchat-run-error run)
+                   (or (slopchat-run-error run) "Summary model cannot execute tools")))
+           (funcall callback run))
+     'compaction)))
 (defun slopchat-model-default (messages)
   (unless slopchat-model--connection
     (setq slopchat-model--connection (slopchat-codex-open)))

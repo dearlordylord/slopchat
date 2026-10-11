@@ -1,0 +1,282 @@
+{
+  "kind": "production-model-source-fidelity-regression",
+  "model": "gpt-6-luna",
+  "passed": true,
+  "reopen": "identical",
+  "fixtureSha256": "4c80e043a3f76335bbdd619202ba90a106fa651aaf7cd00b469af8ac23ebe199",
+  "nodes": [
+    {
+      "node": [
+        0,
+        0
+      ],
+      "text": "echo: Quoted historical tool record 7242 (request; execution not established): Nested quoted request would append correction notes to `memory-audit.md` and `memory-handoff.md` and run `git diff --check`; this record does not establish execution."
+    },
+    {
+      "node": [
+        0,
+        1
+      ],
+      "text": "echo: Quoted historical tool record 7242 (request; execution not established): The quoted tool request would append a correction note dated 2026-10-11 to `memory-audit.md` and `memory-handoff.md`, recording compaction instruction changes, ERT and synthetic-fixture results and limitations, narrow live activation, and actions not taken. It also requested `git diff --check`; this record does not establish that any request was executed."
+    },
+    {
+      "node": [
+        0,
+        2
+      ],
+      "text": "echo: Result: 6 entries; 2 summaries unavailable. echo: Quoted records report correction notes in `docs/memory-audit.md` and `docs/memory-handoff.md`, ERT 129/129, and synthetic checks preserving authorship and result distinctions; general fidelity remains unproven. A spot-check found misattribution, a false “no entries” claim, and a dropped query result. A query for up to eight real compaction records was issued; its result is not included."
+    },
+    {
+      "node": [
+        0,
+        3
+      ],
+      "text": "tool: Requested a query of compaction nodes; result not supplied. Quoted historical example: echo: “no entries” (not the query result)."
+    },
+    {
+      "node": [
+        0,
+        4
+      ],
+      "text": "echo: Supplied result (possibly clipped; total unknown); quoted/sample data: Store has 100 entries; sample `...:1365` reports Codex usage (41,108 input, 0 cached, 62 output; context 258,400) and locally prepared `thread/start` parameters. Process 2347 exited 0. `slopchat-store.el` splits UTF-8 by bytes; retries summaries to 512 bytes, may retain shortest over-limit after five attempts; captures context at `turn/start`, tracks submission and memory-usage attempts, and marks snapshots completed/failed."
+    },
+    {
+      "node": [
+        0,
+        5
+      ],
+      "text": "echo: Result: 0 entries; 0 summaries unavailable."
+    },
+    {
+      "node": [
+        1,
+        0
+      ],
+      "text": "echo: Quoted historical tool record 7242 requested appending a 2026-10-11 correction note to `memory-audit.md` and `memory-handoff.md` covering compaction instruction changes, ERT and synthetic-fixture results and limitations, narrow live activation, and actions not taken; it also requested `git diff --check`. Execution is not established."
+    },
+    {
+      "node": [
+        1,
+        1
+      ],
+      "text": "echo: Result: 6 entries; 2 summaries unavailable. Quoted records report notes in `docs/memory-audit.md` and `docs/memory-handoff.md`, ERT 129/129, synthetic checks; general fidelity unproven. Spot-check found misattribution, false “no entries,” and dropped query result. echo: Query for up to eight compaction records issued; result omitted. tool: Requested compaction-node query; result not supplied. Quoted historical example: echo: “no entries” (not query result)."
+    },
+    {
+      "node": [
+        1,
+        2
+      ],
+      "text": "echo: Supplied result (possibly clipped; total unknown) contained 100 store entries; sample `...:1365` included Codex usage and locally prepared `thread/start` parameters. Process 2347 exited 0. `slopchat-store.el` byte-splits UTF-8, retries summaries to 512 bytes (may retain an over-limit summary after five attempts), captures context at `turn/start`, tracks submission and memory-usage attempts, and marks snapshots completed/failed. echo: Result: 0 entries; 0 summaries unavailable."
+    },
+    {
+      "node": [
+        2,
+        0
+      ],
+      "text": "echo: Quoted record 7242 requested correction notes and `git diff --check`; execution unestablished. echo: Result: 6 entries, 2 summaries unavailable. Quoted records report notes, ERT 129/129 and synthetic checks; general fidelity unproven. Spot-check found misattribution, false “no entries,” and dropped query result. echo: Compaction-record query issued; result omitted. tool: Compaction-node query requested; result not supplied. Quoted example: echo: “no entries” (not query result)."
+    }
+  ],
+  "memoryUsage": {
+    "started": 19,
+    "input": 242325,
+    "output": 2149,
+    "inputObserved": 19,
+    "outputObserved": 19,
+    "cachedInput": 198144,
+    "cachedInputObserved": 19,
+    "cacheWriteInput": 0,
+    "cacheWriteInputObserved": 19
+  },
+  "validationEvents": [
+    {
+      "node": [
+        2,
+        0
+      ],
+      "attempt": 3,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        2,
+        0
+      ],
+      "attempt": 2,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        2,
+        0
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        1,
+        2
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        1,
+        1
+      ],
+      "attempt": 3,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        1,
+        1
+      ],
+      "attempt": 2,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        1,
+        1
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        1,
+        0
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        5
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        4
+      ],
+      "attempt": 5,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        4
+      ],
+      "attempt": 4,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        4
+      ],
+      "attempt": 3,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        4
+      ],
+      "attempt": 2,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        4
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        3
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        2
+      ],
+      "attempt": 2,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        2
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        1
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    },
+    {
+      "node": [
+        0,
+        0
+      ],
+      "attempt": 1,
+      "state": "passed",
+      "scope": "source-boundary",
+      "reason": {}
+    }
+  ]
+}

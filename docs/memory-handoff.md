@@ -107,3 +107,62 @@ A read-only live observation found 35 reported empty-fork first attempts: 585,60
 One cumulative maximum per retained summary thread gave 38 threads, 1,389,777 input, 1,163,264 cached input and 10,694 output. At the same observation the session ledger reported 1,406,106 input, 1,165,056 cached input and 10,726 output; coverage 85/86 attempts. The difference is exactly 16,329 input, 1,792 cached input and 32 output: the previously recorded first post-activation leaf snapshot `:636`, now absent from retained snapshots. Adding that recorded observation reconciles all three counters exactly. Snapshot retention and lifetime accounting have different scopes; missing current telemetry is not zero. Legacy totals were preserved separately.
 
 No extra inference experiment, agent, restart, commit or canonical-memory rewrite was performed. Cached node boundaries and billed cost remain unavailable. Local contract regressions pass and observed accounting reconciles; steady-state cache-economy acceptance remains limited by workload-dependent hit rates.
+
+## Retention and reopen verification: 2026-10-11
+
+Combined isolated ERT passed 127/127, zero unexpected, at 00:59:26-0400; log `/tmp/memory-current-audit-ert.log`. Added `slopchat-reopen-preserves-decision-correction-and-zoom`: a temporary chat preserves an original decision, an explicit path correction, a restriction and an open task across close/open. Rendered view and serialized provider input are exactly equal before and after reopen; zoom returns both original messages exactly. Existing delayed-parent/pending-batch, retry-accounting and cache-routing regressions also pass.
+
+This establishes local storage and request-prefix fidelity, not semantic quality of model-generated summaries: the new short fixtures bypass inference. No new provider calls were made. Summary quality across repeated compression remains open and must not be marked accepted on the strength of these tests. Inspection also confirms that five oversized replies retain the shortest even if it exceeds 512 bytes (the existing regression expects 521 bytes); the nominal size limit is therefore not an unconditional invariant. The governing contract explicitly permits this after five attempts (UNIICHAT.md, retry section: A few bytes over is fine); this is not a deviation and must not be fixed by truncating facts.
+
+No server restart/reload, additional agent, commit, canonical-memory rewrite or reference edit.
+
+
+### 2026-10-11 controlled summary-retention smoke
+
+Isolated batch Emacs, temporary chat, production gpt-6-luna summary path; logs: /tmp/slopchat-quality-audit.log, fixture: /tmp/slopchat-quality-audit.el. Process process-2173 exited 0. Four long synthetic user messages exercised leaf and parent model compression through node (2 0). Final summary preserved RET-42, corrected /tmp/retention-final.json superseding /tmp/retention-fixture.json, budget 1700, pagination open, no restart/commit, Lisp authority, canonical memory/ledger, .references restriction, /tmp/retention-report.md, sections 4/5 passed, section 6 E_RET_6, fix/rerun and incomplete acceptance. Reopen rendered identically. This is one synthetic smoke, not a general quality score.
+
+Observed attribution defect: leaves (0 2) and (0 3) incorporated prior-context facts absent from their own source input, tagging them user. The compaction instruction explicitly forbids adding context-only facts to input summaries. Parent retention passed, but leaf source fidelity did not; do not close the quality audit. Next: regression for context-only fact leakage and adjust compaction prompt, then repeat this fixture and an unrelated-topic fixture. Main chat/server were not modified or restarted; only the isolated test transport was closed.
+
+
+### Source-fidelity prompt correction
+
+Added a task-local instruction to slopchat--compaction-task: summarize only input facts; context may resolve references but must not supply unrelated facts attributed to input. This does not change shared provider instructions or cache-anchor identity. Isolated production-path repeat (process-2192, exit 0; /tmp/slopchat-quality-audit-after.log) preserved the final decision, restrictions, exact paths, ticket, budget, failure and pending work through node (2 0); leaves (0 2)/(0 3) no longer copied the unrelated prior facts observed in the first run. Reopen remained identical. Full isolated ERT passed 127/127 (process-2198; /tmp/memory-quality-ert.log). One before/after synthetic fixture is limited evidence, not a guarantee of summary quality. An unrelated-topic fixture and repeated source-fidelity checks remain open. Prompt edit is on disk only, not loaded into the live server; canonical memory unchanged.
+
+### Source-fidelity follow-up: 2026-10-11
+
+Added slopchat-compaction-source-fidelity-instruction, covering leaf and parent task instructions and exact input boundaries. This is a prompt-contract regression, not a deterministic semantic model-quality test. Combined isolated ERT passed 128/128 (process-2290; /tmp/memory-fidelity-final.log).
+
+Two independent production-model runs of /tmp/slopchat-quality-unrelated.el completed successfully (process-2284 and process-2287). Logs: /tmp/slopchat-quality-unrelated.log and /tmp/slopchat-quality-unrelated-repeat.log. All four leaves stayed on their own topic; no unrelated orchard facts appeared in telescope or recipe leaves. Exact paths, budget, pending work, correction, failure E_SKY_6 and incomplete acceptance survived. Reopen was identical in both runs. The second run compressed the root with inference; the first root fit without further inference. These small synthetic samples do not establish general quality or a leakage-rate bound.
+
+The task-local prompt correction remains on disk pending narrow live activation. No restart, agent, commit, reference edit or canonical-memory rewrite.
+
+Narrow live activation completed: evaluated only the validated slopchat--compaction-task definition from disk; host returned :compaction-prompt-activated. Existing jobs retain already prepared requests; newly prepared tasks use the source-fidelity instruction. No full-file reload, server restart, canonical-memory rewrite or ledger reset.
+
+## Live summary spot check, 2026-10-11
+
+Read-only inspection of completed live nodes after source-fidelity activation found two concrete distortions. Node (3 896), range 7168+8, changes the author of the synthetic-check report from slopchat to echo. Node (2 1796), range 7184+4, says a compaction query returned no entries, although original message 7185 contains multiple entries (some summaries were still nil). Leaf (0 7185) instead summarizes an embedded context sample and drops the outer query result. Other inspected nodes retained reported token counters and pending audit work. This is a bounded spot check, not a general quality guarantee; corrections and mixed-topic quality are not fully covered. Canonical nodes were not rewritten, and no restart, reload, or provider calls were initiated by this check. Follow-up: regressions for nested quoted payloads, author attribution, and absent results versus empty results.
+
+
+### Nested-result and author correction, 2026-10-11
+
+Task-local compaction instructions now preserve authoritative source author labels, distinguish quoted/nested payloads from outer results, exclude compaction instructions from source facts, and distinguish missing/pending results from explicitly empty collections. Added slopchat-compaction-nested-result-instructions (prompt-contract regression, not a semantic guarantee). Combined isolated ERT passed 129/129; log /tmp/memory-nested-final-ert.log.
+
+Production-model fixture /tmp/slopchat-quality-nested.el exposed request-instruction leakage and a tool-to-user attribution error during intermediate runs; both prompted further corrections. Initial run failed with Connection closed, not a quality pass. Final run /tmp/slopchat-quality-nested-author.log preserved all four leaf authors, two entries with nil/pending summaries, an absent query result, and a separate explicitly empty query; reopen identical. This remains a small synthetic sample, not proof of general fidelity.
+
+Narrow live activation returned :compaction-prompt-activated: evaluated only slopchat--compaction-task. Newly prepared tasks use the correction; existing prepared jobs and historical canonical summaries are unchanged. No restart, full reload, agents, commit, reference edits, canonical-memory rewrite, or ledger reset.
+
+
+### Post-activation live fidelity check, 2026-10-11
+
+Read-only comparison of ten completed nodes selected from session compaction provenance whose prepared prompt contains the author-label rule found residual failures. Node (0 7261) says the supplied query result is not included, although its source is a nonempty list of six records, including completed summaries and two pending summaries. It drops that outer result in favor of embedded historical audit facts. Nodes (0 7258) and (0 7259) convert a quoted historical tool request returned by zoom into an assertion that documentation was added; (0 7259) also replaces the outer echo author with tool. Node (1 3629) propagates these leaf distortions rather than repairing them. Node (3 906) says zoom requested compaction records, although zoom returned the text of a historical eval request. Nodes (4 452) and (3 905) preserve the main activation, test, limitation, and user-request facts, with some compression of detail. Other inspected nodes preserve the supplied prior findings or the absence of a result in a tool-request-only source.
+
+Conclusion: the activated prompt does not reliably distinguish nested historical requests from current results. This is a bounded live spot check, not an estimated error rate. No additional tests or provider calls were initiated; no code changes, canonical-node rewrites, restart, activation, commit, reference edits, or ledger reset were performed. Follow-up requires a regression using the actual nonempty nested-result shape and explicit outer-event versus quoted-event attribution; prior synthetic passes are not acceptance of this case.
+
+
+### Recorded summary-boundary failures repaired — 2026-10-11
+
+The residual live failures are now covered by exact source/failure fixtures and source-boundary validation, rather than prompt wording alone. Typed outer-event metadata and required leaf prefixes preserve echo authorship, quoted historical requests, nonempty results and unavailable summaries; parent guards retain separate authors, unestablished execution and unknown clipped-result totals. Reader-constructor syntax is rejected before parsing. Tool-denial reports are inference failures, not source facts; they retry as data-only summaries within the same cap. A live all-authors false rejection was corrected to allow omitted acknowledgements, and the blocked node recovered normally. Nil summaries are unavailable, without asserting an active pending job. Rejected answers, raw responses and normalization are observable in request events and counted in the existing usage ledger; they cannot become canonical nodes or shortest candidates. Retries share the existing five-attempt cap, with visible failure on exhaustion.
+
+Full isolated ERT passed 149/149; TypeScript and Bun passed (52 tests, 207 assertions). Production-model replay retained six records/two unavailable summaries, quoted request 7242, clipped-result uncertainty, empty/missing distinctions and parent attribution; reopen was identical. Retention and unrelated-topic smokes also passed. Final supplemental guards were checked against retained production responses offline, not counted as another trial. See `docs/memory-summary-fidelity.md` and its linked fixtures/evidence for reproduction and limits.
+
+Narrow activation kept server PID 3408388, ledger identity, both views, agent and shared instructions/tools. Existing nodes are immutable; correction notes 7279 and 7288 were appended normally to supersede the identified false historical claims. No historical rewrite, restart or ledger reset. The recorded regressions are closed; arbitrary long-run semantic fidelity is not proven.

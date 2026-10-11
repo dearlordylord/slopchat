@@ -1,0 +1,254 @@
+{
+  "status": {
+    "count": 7293,
+    "cursor": 7293,
+    "working": false,
+    "summaryActive": 0,
+    "summaryFailed": 0
+  },
+  "snapshots": [
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1624",
+      "node": [
+        3,
+        910
+      ],
+      "validationStates": [
+        "passed"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1623",
+      "node": [
+        2,
+        1821
+      ],
+      "validationStates": [
+        "passed"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1622",
+      "node": [
+        2,
+        1821
+      ],
+      "validationStates": [
+        "passed"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1619",
+      "node": [
+        0,
+        7284
+      ],
+      "validationStates": [
+        "passed"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1618",
+      "node": [
+        4,
+        454
+      ],
+      "validationStates": [
+        "passed"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1617",
+      "node": [
+        4,
+        454
+      ],
+      "validationStates": [
+        "passed"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1616",
+      "node": [
+        4,
+        454
+      ],
+      "validationStates": [
+        "rejected"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1615",
+      "node": [
+        4,
+        454
+      ],
+      "validationStates": [
+        "passed"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1614",
+      "node": [
+        4,
+        454
+      ],
+      "validationStates": [
+        "rejected"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1612",
+      "node": [
+        3,
+        909
+      ],
+      "validationStates": [
+        "passed"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1610",
+      "node": [
+        0,
+        7280
+      ],
+      "validationStates": [
+        "passed"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1609",
+      "node": [
+        3,
+        909
+      ],
+      "validationStates": [
+        "passed"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1608",
+      "node": [
+        3,
+        909
+      ],
+      "validationStates": [
+        "rejected"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1607",
+      "node": [
+        3,
+        909
+      ],
+      "validationStates": [
+        "rejected"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1606",
+      "node": [
+        3,
+        909
+      ],
+      "validationStates": [
+        "rejected"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    },
+    {
+      "id": "3408388-1791653088.5503633-2248544140054091975:1605",
+      "node": [
+        3,
+        909
+      ],
+      "validationStates": [
+        "rejected"
+      ],
+      "scope": "source-boundary",
+      "rawResponseCaptured": false,
+      "normalizationCaptured": false
+    }
+  ],
+  "correctionNote": {
+    "ids": [
+      7279
+    ],
+    "text": "Correction: 7258/7259 are echo records quoting historical tool request 7242; nodes (0 7258),(0 7259),(1 3629) wrongly assert execution/docs edits. Record 7261 returned six records, two summaries pending; (0 7261) wrongly says no result. Record 7185 returned clipped data; total unknown, not empty ((2 1796) wrong). Report author at (3 896) is slopchat, not echo. Boundary validation is now active; originals/old nodes unchanged.",
+    "verifiedExact": true
+  },
+  "memoryUsage": {
+    "started": 819,
+    "input": 13005157,
+    "output": 98056,
+    "inputObserved": 819,
+    "outputObserved": 819,
+    "cachedInput": 11742208,
+    "cachedInputObserved": 819,
+    "cacheWriteInput": 0,
+    "cacheWriteInputObserved": 819,
+    "since": 1791686059.7322056,
+    "legacy": {
+      "started": 1128,
+      "input": 17775344,
+      "output": 127211,
+      "inputObserved": 1128,
+      "outputObserved": 1128
+    }
+  },
+  "activationReceipt": "(:status activated :pid 3408388 :count 7293 :cursor 7293 :ledger-preserved t :view-preserved t :compaction-view-preserved t :agent-preserved t :instructions-preserved t :tools-preserved t :functions (slopchat-model-summary slopchat--summary-attempt slopchat--summary-reply slopchat--compaction-task) :activated-at 1791703533.052805)",
+  "recoveredOverStrictAuthorCheck": true,
+  "sourceOnlyCorrectionNote": {
+    "ids": [
+      7288
+    ],
+    "text": "Correction: (0 7275)/(2 1818) wrongly treat a compaction's 'Summary model cannot execute tools' denial as an activation result. The denial is an inference failure, not execution/outcome of the source request. Final fidelity checks are active on server PID 3408388. A nil summary means unavailable; it does not prove an active pending job. Original logs/tree nodes remain unchanged.",
+    "verifiedExact": true
+  }
+}

@@ -428,3 +428,24 @@ Implementation approved on 2026-10-10. Accounting begins at activation; earlier 
 - Future memory-work cache read/write counters and validated cache-read share are deferred. Do not infer financial savings or subscription billing.
 
 Official OpenAI prompt-caching documentation defines API cache-hit share as cached input / input; cached and cache-write input are included in API input accounting. The app-server documentation and generated field names do not yet establish the same contract for installed Codex subscription telemetry. Continue showing raw reported cache counters without a percentage until that mapping is established.
+
+### Next planned work — 2026-10-11
+
+Igor requested recording this plan before implementation. Defer the memory-quality and temporary-chat reopen audit for now.
+
+The mini-bar's cumulative memory-work input is gross reported input across summary attempts, including shortening retries; it does not subtract reported cached input. Thus a value such as two million is accumulated token processing, not current context size, uncached input, or billed expenditure. Legacy totals must remain separately identified: cache telemetry was not collected for that earlier accounting period, so its uncached subtotal is unavailable.
+
+Next UI task: expose memory-work cache telemetry in the existing compact mini-bar, using the session ledger as the single source. Show gross input, reported cached input, and output; show cache-observation coverage or partial/unavailable when needed. Derive uncached input only for observations with both valid input and cached-input counters, never by subtracting a partially covered cache subtotal from all input. Keep legacy totals separate. Raw telemetry does not establish billed savings. Confirm the installed transport accounting contract before enabling a cache percentage. Preserve the existing one-line layout and missing-versus-zero behavior; test complete, partial, zero, and legacy-only data. This entry records the next task, not an implemented UI change or a delivery date.
+
+### Memory-work cache split implemented — 2026-10-11
+
+The mini-bar displays session memory-work new / cached / out token subtotals. New is reported input minus reported cached input, not billed cost. It is available only when input and cache coverage include every started attempt and cached input does not exceed input. Otherwise new is unavailable; observed subtotals remain visible with partial coverage. Zero is preserved. Legacy totals are excluded from this split and remain separately visible in the inspector. No cache percentage or monetary savings is inferred. Source checks passed; runtime activation has not been verified.
+
+
+### Summary source-boundary acceptance — 2026-10-11
+
+A supplied outer result must remain distinguishable from quoted historical requests, missing results, explicitly empty collections and pending summaries. Outer author labels remain authoritative at leaves and merges. Clipped tool output has unknown total/completeness; nested sample counts must not become its total. Task-local metadata may describe these source boundaries without altering canonical source or shared provider instructions/tools. Boundary validation is a bounded structural check, not proof of full semantic fidelity.
+
+Implementation and evidence: `docs/memory-summary-fidelity.md`. Rejected responses remain observable as source-boundary validation events and their provider attempts remain in cumulative memory-work usage. Only valid candidates may be retained; the existing five-attempt limit remains, with a visible failed job on validation exhaustion. Original messages and committed tree nodes stay immutable; identified historical errors are superseded by a normal append-only correction note.
+
+Final acceptance receipt: isolated ERT 149/149; production replay and source-only request probe passed; TypeScript and Bun passed (52 tests, 207 assertions). Nil summaries are labelled unavailable without inferring active jobs. Equivalent empty-only replies are normalized from an empty-only source. Omitting a low-value acknowledgement does not require retaining its author tag; invented authors remain rejected. A forbidden summary tool attempt is an inference failure and retries as data within the existing cap; its denial cannot become a source fact. Raw validation responses and normalization are inspectable. Narrow activation preserved live server/ledger/agent/instructions/tools; corrections use normal append notes 7279 and 7288. Broad semantic quality remains unproven beyond these regressions.

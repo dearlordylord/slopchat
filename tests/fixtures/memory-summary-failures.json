@@ -1,0 +1,37 @@
+[
+  {
+    "node": [
+      0,
+      7185
+    ],
+    "text": "echo: Inspected session context store (`100` entries). Latest sample, `...:1365`, is a completed Codex call reporting 41,108 input tokens, 0 cached, 62 output, and a 258,400-token context limit; its payload records locally prepared parameters and supplied memory prefix."
+  },
+  {
+    "node": [
+      0,
+      7259
+    ],
+    "text": "tool: Appended a “Nested-result and author correction, 2026-10-11” section to `docs/memory-audit.md` and `docs/memory-handoff.md`, documenting prompt-contract changes, ERT 129/129, synthetic-fixture findings and limitations, narrow activation, and actions not taken. Ran `git diff --check`; its result is not included."
+  },
+  {
+    "node": [
+      0,
+      7258
+    ],
+    "text": "echo: Added the “Nested-result and author correction, 2026-10-11” section to `docs/memory-audit.md` and `docs/memory-handoff.md`. It records prompt-contract fixes, ERT 129/129, synthetic fixture outcomes and limitations, narrow activation, and actions not taken. `git diff --check` was run; its result is not stated."
+  },
+  {
+    "node": [
+      1,
+      3629
+    ],
+    "text": "echo: Added a “Nested-result and author correction, 2026-10-11” section to `docs/memory-audit.md` and `docs/memory-handoff.md`, documenting prompt-contract fixes, ERT 129/129, synthetic-fixture outcomes and limitations, narrow activation, and actions not taken. Ran `git diff --check`; its result was not stated."
+  },
+  {
+    "node": [
+      0,
+      7261
+    ],
+    "text": "echo: Live-summary audit remains incomplete: the supplied query result is not included. A bounded spot check found misattribution, a false “no entries” claim, and a dropped outer query result; findings were recorded in the audit and handoff docs. The nested synthetic audit passed, and ERT passed 129/129, but general summary quality remains unproven."
+  }
+]
