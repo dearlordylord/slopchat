@@ -1,5 +1,6 @@
 ;;; slopchat-memory-policy.el --- Application-specific memory policy -*- lexical-binding: t -*-
-(require 'memory)
+(require 'slopchat-memory-load)
+(require 'unii-memory)
 (require 'slopchat-fidelity)
 (require 'slopchat-records)
 (defvar slopchat-message-bytes 30000)

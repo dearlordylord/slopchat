@@ -71,7 +71,7 @@ emacs --batch -Q -L lisp \
   -l tests/slopchat-process-test.el -l tests/slopchat-failure-test.el \
   -l tests/slopchat-context-test.el -l tests/slopchat-memory-usage-test.el \
   -l tests/slopchat-cache-candidate-test.el -l tests/slopchat-fidelity-test.el \
-  -l tests/memory-test.el \
+  -l vendor/unii-memory/tests/unii-memory-test.el -l tests/memory-boundary-test.el \
   -f ert-run-tests-batch-and-exit
 bun run --cwd ui typecheck
 bun run --cwd ui test
@@ -87,11 +87,20 @@ a finished model turn automatically.
 
 * Standalone memory module
 
-The application's memory is behind the =memory-*= interface. The four
-=memory*.el= implementation files can be loaded without SlopChat, Ouro or Codex;
+The application's memory is behind the =unii-memory-*= interface. The four
+=unii-memory*.el= implementation files can be loaded without SlopChat or Codex;
 a summarizer is supplied as an asynchronous backend. The application owns its
 turn loop and provider adapter, while memory owns its journal, tree, views,
 compaction queues and usage accounting.
 
 See [[file:docs/memory-module.org][the interface and backend contract]] for API,
 ownership, truthful cache visibility and independent package/socket checks.
+
+** Developing the dependency
+Clone with =git clone --recurse-submodules=, or run
+=git submodule update --init --recursive= in an existing clone.
+The application loads =vendor/unii-memory= directly. Edit its sources there;
+no package installation or release is needed. Use a fresh Emacs process to test.
+Commit and push library changes inside that directory, then commit its updated
+Git pointer in SlopChat. Before editing a pinned checkout, use
+=git -C vendor/unii-memory switch main=.

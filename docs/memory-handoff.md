@@ -182,3 +182,18 @@ The contract and reproduction commands are in `docs/memory-module.org`; the requ
 The comparison to committed store `26880f3` matched all views after 1024 appends and all 2047 nodes, crossed five main and 24 compaction batch drops at the actual default budgets, and reopened identically. The isolated production replay passed six leaves/four parents and reopen; its own ledger reports 20 attempts, 232,910 input, 180,224 cached input and 2,443 output with 20/20 coverage. Subsequent diagnostic result attachment and optional presentation-policy changes are covered by deterministic regressions; these are not additional provider trials.
 
 The pre-extraction main server PID 3408388 was neither restarted nor hot-reloaded into the new struct layout. Its read-only final status was count/cursor 7345, idle, zero active/failed summaries. Fresh application processes use the new module. Canonical main records/views and live session ledger were not rewritten/reset by this extraction. Existing multilevel-retention notes were preserved. Publication of a separate repository/package remains a future action.
+
+## Public package extraction (2026-10-11)
+
+The core now lives at https://github.com/dearlordylord/unii-memory and is loaded
+directly from the `vendor/unii-memory` Git submodule. Public symbols and features
+use `unii-memory-`; the durable storage format is unchanged. Application prompts
+and Codex adapters remain in SlopChat. The package's original implementation is
+MIT licensed; upstream UNII text is linked and is not bundled or relicensed.
+Initialize clones with `git submodule update --init --recursive`. Edit library
+sources in place, test with a fresh Emacs process, push the library commit, then
+commit the updated submodule pointer in SlopChat. The main server was not restarted.
+Validation: 173/173 combined ERT tests, 22/22 standalone tests, warning-free core
+compilation, clean package installation, isolated socket smoke; GitHub CI passed
+on Emacs 29.1 and 30.2. Prior JSON extraction evidence describes the earlier
+in-repository layout and is retained as historical evidence.

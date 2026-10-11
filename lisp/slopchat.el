@@ -1,5 +1,6 @@
 ;;; slopchat.el --- One persistent chat, fresh model runs -*- lexical-binding: t -*-
-(require 'memory)
+(require 'slopchat-memory-load)
+(require 'unii-memory)
 (require 'slopchat-memory-policy)
 (require 'slopchat-memory-backend)
 (require 'slopchat-records)
@@ -33,16 +34,16 @@
   (let ((chat (slopchat--chat-create :directory (file-name-as-directory (expand-file-name directory))
                                    :queued-input (slopchat-queue-create))))
     (setf (slopchat-chat-memory chat)
-          (memory-open directory :backend (slopchat-memory-backend chat) :policy (slopchat-memory-policy)))
+          (unii-memory-open directory :backend (slopchat-memory-backend chat) :policy (slopchat-memory-policy)))
     chat))
 (defun slopchat-close (chat)
-  (memory-close (slopchat-chat-memory chat))
+  (unii-memory-close (slopchat-chat-memory chat))
   (setf (slopchat-chat-closed chat) t))
 (defun slopchat-log (chat kind text &optional presentation)
-  (plist-get (memory-append (slopchat-chat-memory chat)
+  (plist-get (unii-memory-append (slopchat-chat-memory chat)
                            (list :kind kind :text text :presentation presentation :context-id slopchat-log-context-id)) :ids))
-(defun slopchat-schedule (chat) (memory-step (slopchat-chat-memory chat)))
-(defun slopchat--memory-status (chat) (memory-inspect (slopchat-chat-memory chat) 'status))
+(defun slopchat-schedule (chat) (unii-memory-step (slopchat-chat-memory chat)))
+(defun slopchat--memory-status (chat) (unii-memory-inspect (slopchat-chat-memory chat) 'status))
 (cl-defstruct (slopchat-input (:constructor slopchat--input-create)) text first callback steer)
 
 (defun slopchat--record-input-error (chat input error)
@@ -120,9 +121,9 @@
   (let* (failure (text (condition-case err
                   (pcase tool
                     ("emacs_eval" (prin1-to-string (eval (read (plist-get args :expression)) t)))
-                    ("zoom" (json-serialize (memory-zoom (slopchat-chat-memory chat) (plist-get args :id)
+                    ("zoom" (json-serialize (unii-memory-zoom (slopchat-chat-memory chat) (plist-get args :id)
                                   (plist-get args :n) :page (plist-get args :page))))
-                    ("date" (memory-date (slopchat-chat-memory chat) (plist-get args :id)))
+                    ("date" (unii-memory-date (slopchat-chat-memory chat) (plist-get args :id)))
                     (_ (error "Unknown tool: %s" tool)))
                 (error (setq failure t) (concat "ERROR: " (error-message-string err))))))
     (slopchat--check-cancel)
@@ -172,7 +173,7 @@
       (remhash chat slopchat--rounds))))
 (defun slopchat--start-input-body (chat input)
   (let* ((slopchat-log-context-id nil)
-         (snapshot (memory-snapshot (slopchat-chat-memory chat) :before (slopchat-input-first input)))
+         (snapshot (unii-memory-snapshot (slopchat-chat-memory chat) :before (slopchat-input-first input)))
          (prefix (plist-get snapshot :view))
          (prompt (concat (plist-get snapshot :text) "\n\n" (slopchat-input-text input))))
     (unless (eq (plist-get snapshot :state) 'ready) (error "Prior memory is not ready"))
@@ -192,7 +193,7 @@
                  (slopchat-model-context-observer
                   (lambda (observation)
                     (unless (slopchat-chat-closed chat)
-                      (memory-observe (slopchat-chat-memory chat) observation))))
+                      (unii-memory-observe (slopchat-chat-memory chat) observation))))
                  (slopchat-model-context-provenance
                   (list :memory-text (plist-get snapshot :text)
                         :memory-prefix (slopchat-context-copy prefix)
@@ -259,7 +260,7 @@
 (defun slopchat-submit (chat text &optional callback on-accepted queue-only)
   "Log input once; steer a live turn or queue a fresh turn. Return its first ID.
 CALLBACK receives (REPLY ERROR) when a newly started user turn completes."
-  (let* ((receipt (memory-append (slopchat-chat-memory chat) (list :kind "user" :text text)))
+  (let* ((receipt (unii-memory-append (slopchat-chat-memory chat) (list :kind "user" :text text)))
          (first (plist-get receipt :first-id))
          (input (slopchat--input-create :text text :first first :callback callback
                                       :steer (and (not queue-only) (slopchat-chat-run chat) t))))

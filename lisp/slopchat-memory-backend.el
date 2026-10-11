@@ -1,5 +1,6 @@
 ;;; slopchat-memory-backend.el --- Codex adapter for standalone memory -*- lexical-binding: t -*-
-(require 'memory)
+(require 'slopchat-memory-load)
+(require 'unii-memory)
 (require 'slopchat-model)
 (require 'slopchat-cache-candidate)
 (defvar slopchat-summary-model)
@@ -34,7 +35,7 @@
                  (lambda (method params)
                    (cond
                     ((member method '("thread/start" "thread/fork"))
-                     (setf (plist-get job :provider-request) (list :method method :params (memory-context-copy params))))
+                     (setf (plist-get job :provider-request) (list :method method :params (unii-memory-context-copy params))))
                     ((equal method "turn/start")
                      (funcall emit
                               (list :kind 'submission :state 'prepared :prepared-at (float-time)
@@ -60,7 +61,7 @@
              (when slopchat-cache-thread-provenance
                (setf (plist-get job :provider-request)
                      (plist-put (plist-get job :provider-request) :anchorMetadata
-                                (memory-context-copy slopchat-cache-thread-provenance)))))
+                                (unii-memory-context-copy slopchat-cache-thread-provenance)))))
            (let ((run (slopchat-model-summary
                        connection (plist-get job :thread) (plist-get request :prompt)
                        (lambda (run)

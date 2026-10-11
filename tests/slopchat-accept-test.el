@@ -20,14 +20,14 @@
 
 (ert-deftest slopchat-acceptance-before-pump ()
  (let ((chat (slopchat--chat-create :queued-input (slopchat-queue-create))) events)
-  (cl-letf (((symbol-function 'memory-append) (lambda (&rest _) (push 'durable events) '(:first-id 0 :ids (0) :end-exclusive 1)))
+  (cl-letf (((symbol-function 'unii-memory-append) (lambda (&rest _) (push 'durable events) '(:first-id 0 :ids (0) :end-exclusive 1)))
             ((symbol-function 'slopchat-pump) (lambda (_) (should (equal events '(accepted durable))) (push 'pump events))))
    (slopchat-submit chat "input" nil (lambda (_) (push 'accepted events)))
    (should (equal events '(pump accepted durable))))))
 
 (ert-deftest slopchat-cli-ack-before-blocked-pump ()
  (let ((chat (slopchat--chat-create :queued-input (slopchat-queue-create))) responses)
-  (cl-letf (((symbol-function 'memory-append) (lambda (&rest _) '(:first-id 0 :ids (0) :end-exclusive 1)))
+  (cl-letf (((symbol-function 'unii-memory-append) (lambda (&rest _) '(:first-id 0 :ids (0) :end-exclusive 1)))
             ((symbol-function 'slopchat-cli--reply) (lambda (_ value) (push value responses)))
             ((symbol-function 'slopchat-pump) (lambda (_)
                (should (equal responses '((:status "accepted" :value 0))))
@@ -38,7 +38,7 @@
 
 (ert-deftest slopchat-queue-only-never-steers ()
  (let* ((run (slopchat--run-create :turn "live")) (chat (slopchat--chat-create :run run :queued-input (slopchat-queue-create))) accepted)
-  (cl-letf (((symbol-function 'memory-append) (lambda (&rest _) '(:first-id 0 :ids (0) :end-exclusive 1)))
+  (cl-letf (((symbol-function 'unii-memory-append) (lambda (&rest _) '(:first-id 0 :ids (0) :end-exclusive 1)))
             ((symbol-function 'slopchat-pump) (lambda (_) nil))
             ((symbol-function 'slopchat-codex-steer) (lambda (&rest _) (ert-fail "must not steer"))))
    (slopchat-submit chat "later" nil (lambda (_) (setq accepted t)) t)

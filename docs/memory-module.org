@@ -1,9 +1,9 @@
 #+title: Standalone memory interface
 
 The memory implementation is a four-file Emacs Lisp module:
-=lisp/memory.el=, =lisp/memory-store.el=, =lisp/memory-context.el= and
-=lisp/memory-usage.el=. Copy these files together into a load-path directory.
-The module does not load SlopChat, Ouro, Codex, the UI or any model connection.
+=vendor/unii-memory/unii-memory.el=, =vendor/unii-memory/unii-memory-store.el=, =vendor/unii-memory/unii-memory-context.el= and
+=vendor/unii-memory/unii-memory-usage.el=. Copy these files together into a load-path directory.
+The module does not load SlopChat, Codex, the UI or any model connection.
 It requires Emacs 29.1+ (tested on 30.2), Linux =flock= and =truncate= for the
 existing storage/lock recovery implementation. No external storage backend is
 promised by this first interface.
@@ -17,19 +17,19 @@ message IDs, short-source behavior or the two batching algorithms.
 * Public operations
 
 #+begin_src elisp
-(require 'memory)
-(memory-open directory :backend backend :policy policy) ; opaque handle
-(memory-append memory record)                            ; durable receipt
-(memory-snapshot memory :before id :view 'main)          ; copied context
-(memory-zoom memory first span :page page)               ; copied source page
-(memory-date memory id)
-(memory-inspect memory query)                            ; bounded copied data
-(memory-subscribe memory listener)                       ; unsubscribe function
-(memory-step memory)                                    ; no waiting for I/O
-(memory-close memory)
+(require 'unii-memory)
+(unii-memory-open directory :backend backend :policy policy) ; opaque handle
+(unii-memory-append memory record)                            ; durable receipt
+(unii-memory-snapshot memory :before id :view 'main)          ; copied context
+(unii-memory-zoom memory first span :page page)               ; copied source page
+(unii-memory-date memory id)
+(unii-memory-inspect memory query)                            ; bounded copied data
+(unii-memory-subscribe memory listener)                       ; unsubscribe function
+(unii-memory-step unii-memory)                                    ; no waiting for I/O
+(unii-memory-close unii-memory)
 #+end_src
 
-The handle is private. Applications must not use =memory--*= functions,
+The handle is private. Applications must not use =unii-memory--*= functions,
 structure accessors, hash tables or queues. All returned containers and strings
 are owned copies. Reading and zooming do not change the agent's context.
 
@@ -42,7 +42,7 @@ session-only; old exact call links return unavailable after reopen.
 
 * Records and turn boundaries
 
-=memory-append= accepts a plist with =:kind= and =:text=. Optional
+=unii-memory-append= accepts a plist with =:kind= and =:text=. Optional
 =:presentation= and =:context-id= preserve application metadata in the existing
 journal format. Kind is a nonempty string, optionally restricted by policy.
 The receipt contains =:first-id=, =:ids= and =:end-exclusive=. Long text can
@@ -53,10 +53,10 @@ The application durably appends the input, saves its receipt with the queued
 turn, and prepares the snapshot at the actual launch:
 
 #+begin_src elisp
-(let* ((receipt (memory-append memory (list :kind "user" :text input)))
+(let* ((receipt (unii-memory-append memory (list :kind "user" :text input)))
        (first (plist-get receipt :first-id)))
   ;; Keep FIRST with the application's queued input.
-  (memory-snapshot memory :before first))
+  (unii-memory-snapshot memory :before first))
 #+end_src
 
 =:before= is exclusive. The new input goes after the returned context, exactly
@@ -124,7 +124,7 @@ scheduling never scans the tree for work.
 
 * Inspection and subscriptions
 
-=memory-inspect= accepts a kind symbol or =(:kind KIND ...)=:
+=unii-memory-inspect= accepts a kind symbol or =(:kind KIND ...)=:
 
 - =status=: count/cursor, active jobs, failed node keys, queued/waiting counts,
   current context bytes, view count, closure and notification sequence.
@@ -147,14 +147,14 @@ usage ledger. Missing counters differ from reported zero. Thread totals are not
 precise per-attempt spend, and provider tokens are not billed money or known
 cached tree nodes.
 
-=memory-subscribe= delivers ordered copied notifications after committed
+=unii-memory-subscribe= delivers ordered copied notifications after committed
 operations: record append, job/attempt start, provider observations, validation,
 node build, view publication, final job outcome and close. Building a node and
 including it in a view are distinct. Each notification carries local sequence
 and time. Listener failure cannot fail a journal write. Notifications are not a
 durable event log; restore current truth through inspection after reconnect.
 
-An additional adapter ingress, =memory-observe memory observation=, lets normal
+An additional adapter ingress, =unii-memory-observe memory observation=, lets normal
 application calls share this same bounded pool with compactions:
 =prepared= (= :payload/:provenance=) returns a call ID; =event=
 (= :id/:event=) appends evidence; =finished= (= :id/:outcome=) terminates it.
@@ -167,7 +167,7 @@ turn inspector without exposing the snapshot store to the application.
 =slopchat-chat= contains a memory handle alongside host directory, transport,
 turn, input queue, agent, closure and stream. It contains no tree/view/job or
 accounting fields. SlopChat and its UI read memory only through the public API.
-The host calls =memory-step= before/after its existing transport pump; memory
+The host calls =unii-memory-step= before/after its existing transport pump; memory
 never pumps the transport, starts an ordinary reply or steers a user turn.
 
 =slopchat-memory-backend.el= owns Codex conversations/cache routing and maps
@@ -189,16 +189,16 @@ production-model runs exercise it without changing the canonical main chat.
 * Reproduction
 
 #+begin_src sh
-emacs --batch -Q -L lisp -l tests/memory-test.el -f ert-run-tests-batch-and-exit
+emacs --batch -Q -L vendor/unii-memory -l vendor/unii-memory/tests/unii-memory-test.el -f ert-run-tests-batch-and-exit
 emacs --batch -Q -l scripts/memory-module-package-check.el
 python3 scripts/memory-module-cli-smoke.py
 
 # Compare to the fixed pre-extraction commit, with deterministic fake inference.
-git show 26880f3:lisp/slopchat-store.el > /tmp/memory-module-legacy-store.el
-MEMORY_LEGACY_STORE=/tmp/memory-module-legacy-store.el emacs --batch -Q -L lisp -l scripts/memory-module-compatibility.el
+git show 26880f3:lisp/slopchat-store.el > /tmp/unii-memory-module-legacy-store.el
+MEMORY_LEGACY_STORE=/tmp/unii-memory-module-legacy-store.el emacs --batch -Q -L lisp -l scripts/memory-module-compatibility.el
 
 # Opt-in: real inference in an isolated temporary chat; exports a separate report.
-SLOPCHAT_FIDELITY_EVIDENCE=/tmp/memory-module-provider-evidence.json emacs --batch -Q -L lisp -l scripts/memory-fidelity-smoke.el
+SLOPCHAT_FIDELITY_EVIDENCE=/tmp/unii-memory-module-provider-evidence.json emacs --batch -Q -L lisp -l scripts/memory-fidelity-smoke.el
 #+end_src
 
 Evidence: =memory-module-evidence.json=. The comparison checks every main and
