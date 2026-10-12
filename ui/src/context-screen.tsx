@@ -1,3 +1,4 @@
+import type {Status} from './protocol'
 import {contextSections,contextSectionHint} from './context-sections'
 import {Expression} from './expression'
 import {useMemo,useState,useEffect} from 'react'
@@ -7,7 +8,7 @@ import {useKeyboard} from '@opentui/react'
 import {Cause} from 'effect'
 import type {makeClient} from './client'
 import {theme} from './theme'
-export function ContextScreen({client,onExit,initialId}:{initialId?:string;client:ReturnType<typeof makeClient>;onExit:()=>void}){
+export function ContextScreen({client,onExit,initialId,status}:{status?:Status;initialId?:string;client:ReturnType<typeof makeClient>;onExit:()=>void}){
  const controller=useMemo(()=>makeContextController(client,undefined,initialId),[client,initialId])
  const [selection,setSelection]=useAtom(controller.selection)
  const [requestedOffset,setCallOffset]=useAtom(controller.callOffset)

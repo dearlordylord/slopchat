@@ -103,3 +103,9 @@ test('compaction inspection shows cache counters and reporting coverage',async()
   const frame=t.captureCharFrame();expect(frame).toContain('cache read: 8');expect(frame).toContain('Reported thread totals: input 30');expect(frame).toContain('cache read 24 (2/2 attempts)');expect(frame).toContain('cache write unavailable (0/2 attempts)');expect(frame).toContain('Legacy memory work before activation: input 99');expect(frame).toContain('Accounting period began:');
  }finally{flushSync(()=>root.unmount());await client.close();registry.dispose();t.renderer.destroy()}
 })
+
+test('memory widget toggle preserves draft and focus without requests',async()=>{
+ const t=await createTestRenderer({width:100,height:30,kittyKeyboard:true});const registry=Registry.make();const client=makeClient('/tmp/widget-toggle',registry);const session=makeViewSession();const root=createRoot(t.renderer);
+ try{flushSync(()=>root.render(<RegistryContext.Provider value={registry}><App client={client} session={session}/></RegistryContext.Provider>));await t.flush();await t.mockInput.pasteBracketedText('retained draft');const editor=t.renderer.root.findDescendantById('composer') as TextareaRenderable;editor.cursorOffset=4;editor.setSelection(1,4);const cursor=editor.cursorOffset;const selection=editor.getSelection();flushSync(()=>t.mockInput.pressKey('b',{ctrl:true}));await t.waitFor(()=>!!t.renderer.root.findDescendantById('memory-widget'));expect(editor.plainText).toBe('retained draft');expect(editor.cursorOffset).toBe(cursor);expect(editor.getSelection()).toEqual(selection);expect(editor.focused).toBe(true);expect(session.memoryWidget).toBe(true);flushSync(()=>t.mockInput.pressKey('b',{ctrl:true}));await t.waitFor(()=>!t.renderer.root.findDescendantById('memory-widget'));expect(editor.plainText).toBe('retained draft');expect(editor.focused).toBe(true);
+ }finally{flushSync(()=>root.unmount());await client.close();registry.dispose();t.renderer.destroy()}
+})

@@ -449,3 +449,32 @@ A supplied outer result must remain distinguishable from quoted historical reque
 Implementation and evidence: `docs/memory-summary-fidelity.md`. Rejected responses remain observable as source-boundary validation events and their provider attempts remain in cumulative memory-work usage. Only valid candidates may be retained; the existing five-attempt limit remains, with a visible failed job on validation exhaustion. Original messages and committed tree nodes stay immutable; identified historical errors are superseded by a normal append-only correction note.
 
 Final acceptance receipt: isolated ERT 149/149; production replay and source-only request probe passed; TypeScript and Bun passed (52 tests, 207 assertions). Nil summaries are labelled unavailable without inferring active jobs. Equivalent empty-only replies are normalized from an empty-only source. Omitting a low-value acknowledgement does not require retaining its author tag; invented authors remain rejected. A forbidden summary tool attempt is an inference failure and retries as data within the existing cap; its denial cannot become a source fact. Raw validation responses and normalization are inspectable. Narrow activation preserved live server/ledger/agent/instructions/tools; corrections use normal append notes 7279 and 7288. Broad semantic quality remains unproven beyond these regressions.
+
+
+### Deferred Claude support — 2026-10-11
+
+Igor approved deferring Claude/Anthropic support. The current implementation uses Codex; the Claude Haiku xhigh and Anthropic cache-mark strategy described in sections 3.3–4 of `docs/UNIICHAT.md` is a future provider integration, not an implemented capability or a current completion gate. Revisit model selection, cache boundaries and provider-specific accounting when Claude support is explicitly prioritized. Preserve the provider-neutral inspector contract; do not assume Codex cache observations establish Anthropic behavior or billing savings. No Claude implementation is authorized by this note.
+
+### Approved Memory view increment, 2026-10-11
+
+Keep the existing composer mini-bar, summary animation and cumulative accounting. Do not add /memory: use the Memory tab inside /context and an optional fixed-height widget above conversation history. Ctrl+M remains Enter; Ctrl+P remains older history. Ctrl+B toggles the widget without changing composer focus; M toggles Context/Memory inside the inspector. Widget visibility belongs to the view session.
+
+Implemented on disk: Lisp-reported active/failed counts, published record coverage, and up to 100 current job ranges/states in the inspector. The widget has a fixed five-row layout. This is current-state inspection, not a retained event feed; completed summaries, publication identities, persistent error details and grouped history remain incomplete. Empty jobs and unavailable metadata must remain distinct. No automatic opening or focus capture.
+
+Checks: TypeScript passed; Bun 53 tests / 209 assertions; relevant ERT 55/55; diff check passed. Runtime activation and dedicated toggle/draft/selection/scroll acceptance remain open. TODO 2 is not complete.
+
+Follow-up checks: TypeScript and Bun passed 54 tests / 216 assertions. Ctrl+B toggle preserves draft, cursor, selection and composer focus. Runtime activation, scroll acceptance and the retained event feed remain open.
+
+### Memory widget adjustment — 2026-10-11
+
+Igor requested moving current-job details out of Context into the chat widget. Ctrl+B toggles a fixed-height widget listing up to 100 current jobs with source ranges and authoritative states; unavailable and an empty job list remain distinct. Duplicate activity counters remain only in the existing mini-bar. The Memory tab has been removed from Context. Built does not imply published; retained event history and error details remain open. TypeScript and Bun passed (54 tests, 216 assertions); runtime activation and scroll acceptance remain unverified.
+
+### Memory session feed increment — 2026-10-11
+
+Added a bounded Lisp-observed feed of the latest 50 session events alongside current jobs in the fixed-height widget. Observation begins on the first status read; earlier events are not reconstructed. Summary completion and view publication are distinct; publication does not prove provider delivery. Error details are capped at 4,000 characters. Ctrl+B remains single-sourced. Details can be expanded by click or Enter on a focused event.
+
+Checks: TypeScript and Bun 54 tests/216 assertions passed; existing ERT 55/55 and the new bounded-feed regression 1/1 passed; diff check passed. This increment is not activated. TODO 2 remains open: reliable keyboard focus/navigation, source links, explicit retry-success correlation, selection/scroll preservation, lifecycle acceptance and runtime verification are not complete. Errors can age out of the 50-event window; persistent error treatment remains open.
+
+### Memory session feed follow-up skipped — 2026-10-11
+
+Igor explicitly declined further work on the session-feed increment. Mark its remaining work as skipped, not completed: keyboard navigation, source links, retry-success correlation, selection/scroll preservation, lifecycle acceptance, runtime activation and persistent error treatment. Do not activate or extend this increment under the previous approval. Existing on-disk changes are not removed by this decision. TODO 2 is skipped for now; the next discussion is item 3, Inline memory lens and source navigation, starting with scope and UX agreement rather than implementation.

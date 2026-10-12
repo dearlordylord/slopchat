@@ -238,3 +238,47 @@ The contract and reproduction commands are in `docs/memory-module.org`; the requ
 The comparison to committed store `26880f3` matched all views after 1024 appends and all 2047 nodes, crossed five main and 24 compaction batch drops at the actual default budgets, and reopened identically. The isolated production replay passed six leaves/four parents and reopen; its own ledger reports 20 attempts, 232,910 input, 180,224 cached input and 2,443 output with 20/20 coverage. Subsequent diagnostic result attachment and optional presentation-policy changes are covered by deterministic regressions; these are not additional provider trials.
 
 The pre-extraction main server PID 3408388 was neither restarted nor hot-reloaded into the new struct layout. Its read-only final status was count/cursor 7345, idle, zero active/failed summaries. Fresh application processes use the new module. Canonical main records/views and live session ledger were not rewritten/reset by this extraction. Existing multilevel-retention notes were preserved. Publication of a separate repository/package remains a future action.
+
+## Production-threshold scheduling/storage audit, 2026-10-11
+
+Isolated fresh batch Emacs and a durable temporary chat exercised the unchanged
+128,000/64,000 main and 32,000/16,000 compaction UTF-8 byte budgets, concurrency
+8, and 1,024 records. Eight real injected-backend parent callbacks were held:
+main size reached 150,804 bytes, cursor 300, and both batching flags remained
+pending. Injecting offline failures into those callbacks, closing and reopening
+preserved both rendered views and cursor exactly, including pending batching.
+Normal append/scheduling then recovered the work. The continuation observed five
+main drops and 22 compaction drops; final sizes were 99,960 and 19,432 bytes.
+Ten-level zoom returned both children; originals 0, 299 and 1023 reconstructed
+exactly with 64-byte pagination. Final reopen preserved both views exactly.
+Retained fixture text included RETAIN_42, old.csv explicitly superseded by
+final.csv, budget 2300, E_RETAIN_6, unverified pagination, open task, Lisp authority
+and canonical-memory/ledger restrictions.
+
+Evidence: `/tmp/slopchat-threshold-audit.el` and
+`/tmp/slopchat-threshold-audit.log`, process-20 exited 0. Existing memory
+regressions passed 44/44, zero unexpected, process-21 exited 0; log
+`/tmp/slopchat-threshold-regressions.log` (15:05:57-0400).
+
+Limits: this is deterministic scheduling/storage evidence, not a new production
+model semantic-quality trial. The injected backend returns a fixed attributed
+490-byte line; retained facts therefore verify storage, not model selection or
+compression quality. The earlier 16-message gpt-6-luna multilevel fixture remains
+the semantic smoke evidence; production-threshold model semantic fidelity is
+still unverified. The initial fixture stalled at 7,940 bytes because eight held
+parents exhausted concurrency before later model-required leaves could publish;
+short source leaves were used instead to isolate parent-stalled batching. An
+initial pagination assertion also failed because changing the application variable
+did not update the captured memory policy; explicit fixture policy refresh fixed
+that harness issue. These failed runs are not successful audit results.
+No server restart, production activation, canonical chat/ledger or .references
+edit, agent spawn, or commit was performed. Temporary chats were removed.
+
+### Production-model threshold check, 2026-10-11
+A temporary 300-record chat used gpt-6-luna for actual parent summaries, with locally built short leaves. Main view crossed 128,000 bytes (peak 131,414), then settled at 63,699. Batch flags cleared and no failed jobs remained. Inspected merged ranges 0+8 and 144+8 retained RETAIN_42, old.csv, the correction to final.csv, and budget 2300. The final failure E_RETAIN_6, open task, pagination-unverified status and preservation restrictions remained in the unmerged final leaf: this run does NOT establish their retention through compression. Original retrieval and exact reopen passed. Evidence: /tmp/slopchat-threshold-model.el and /tmp/slopchat-threshold-model.log; process-26 and process-27 exited 0. This is bounded model evidence, not a general semantic-fidelity guarantee. No canonical memory/ledger change, restart or commit.
+
+## Final compressed-failure threshold check, 2026-10-11
+
+The isolated 300-record production-model fixture moved the failure/open-task record to message 7 so it was compressed into node (3 0), rather than remaining an original leaf. With gpt-6-luna, the view crossed 128,000 bytes (peak 131,414) and shrank to 63,581. The actual multiline node retained E_RETAIN_6, task open, pagination unverified, no restart, and preservation of canonical memory and ledger. All seven literal assertions passed; exact original recovery and rendered-view reopen identity passed. Process-32 exited 0; evidence: /tmp/slopchat-threshold-final.el and /tmp/slopchat-threshold-final.log. The initial construction attempt failed with void-variable FAILURE before the corrected fixture ran. A single-line grep initially hid the retained facts; the full multiline excerpt confirmed them.
+
+This closes the agreed bounded retention/batching audit checklist, not a guarantee of arbitrary semantic fidelity or billed cache savings. No additional acceptance checks are required for this checklist. Canonical memory and ledger were untouched; no server restart, activation, or commit.

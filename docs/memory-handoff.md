@@ -197,3 +197,47 @@ Validation: 173/173 combined ERT tests, 22/22 standalone tests, warning-free cor
 compilation, clean package installation, isolated socket smoke; GitHub CI passed
 on Emacs 29.1 and 30.2. Prior JSON extraction evidence describes the earlier
 in-repository layout and is retained as historical evidence.
+
+## Production-threshold scheduling/storage audit, 2026-10-11
+
+Isolated fresh batch Emacs and a durable temporary chat exercised the unchanged
+128,000/64,000 main and 32,000/16,000 compaction UTF-8 byte budgets, concurrency
+8, and 1,024 records. Eight real injected-backend parent callbacks were held:
+main size reached 150,804 bytes, cursor 300, and both batching flags remained
+pending. Injecting offline failures into those callbacks, closing and reopening
+preserved both rendered views and cursor exactly, including pending batching.
+Normal append/scheduling then recovered the work. The continuation observed five
+main drops and 22 compaction drops; final sizes were 99,960 and 19,432 bytes.
+Ten-level zoom returned both children; originals 0, 299 and 1023 reconstructed
+exactly with 64-byte pagination. Final reopen preserved both views exactly.
+Retained fixture text included RETAIN_42, old.csv explicitly superseded by
+final.csv, budget 2300, E_RETAIN_6, unverified pagination, open task, Lisp authority
+and canonical-memory/ledger restrictions.
+
+Evidence: `/tmp/slopchat-threshold-audit.el` and
+`/tmp/slopchat-threshold-audit.log`, process-20 exited 0. Existing memory
+regressions passed 44/44, zero unexpected, process-21 exited 0; log
+`/tmp/slopchat-threshold-regressions.log` (15:05:57-0400).
+
+Limits: this is deterministic scheduling/storage evidence, not a new production
+model semantic-quality trial. The injected backend returns a fixed attributed
+490-byte line; retained facts therefore verify storage, not model selection or
+compression quality. The earlier 16-message gpt-6-luna multilevel fixture remains
+the semantic smoke evidence; production-threshold model semantic fidelity is
+still unverified. The initial fixture stalled at 7,940 bytes because eight held
+parents exhausted concurrency before later model-required leaves could publish;
+short source leaves were used instead to isolate parent-stalled batching. An
+initial pagination assertion also failed because changing the application variable
+did not update the captured memory policy; explicit fixture policy refresh fixed
+that harness issue. These failed runs are not successful audit results.
+No server restart, production activation, canonical chat/ledger or .references
+edit, agent spawn, or commit was performed. Temporary chats were removed.
+
+### Final bounded threshold evidence, 2026-10-11
+300 temporary records with real gpt-6-luna parent merges: peak 131414 -> final 63699 bytes; batches cleared, no failed jobs, originals/reopen exact. Merged decision and correction survived. Final failure/open-task/restrictions stayed in a leaf, so threshold-scale compressed retention of those facts remains the sole specific follow-up for this audit. Logs: /tmp/slopchat-threshold-model.log. Do not expand this into indefinite reliability testing; one targeted merge of these final facts completes the agreed bounded acceptance, not a universal guarantee.
+
+## Final compressed-failure threshold check, 2026-10-11
+
+The isolated 300-record production-model fixture moved the failure/open-task record to message 7 so it was compressed into node (3 0), rather than remaining an original leaf. With gpt-6-luna, the view crossed 128,000 bytes (peak 131,414) and shrank to 63,581. The actual multiline node retained E_RETAIN_6, task open, pagination unverified, no restart, and preservation of canonical memory and ledger. All seven literal assertions passed; exact original recovery and rendered-view reopen identity passed. Process-32 exited 0; evidence: /tmp/slopchat-threshold-final.el and /tmp/slopchat-threshold-final.log. The initial construction attempt failed with void-variable FAILURE before the corrected fixture ran. A single-line grep initially hid the retained facts; the full multiline excerpt confirmed them.
+
+This closes the agreed bounded retention/batching audit checklist, not a guarantee of arbitrary semantic fidelity or billed cache savings. No additional acceptance checks are required for this checklist. Canonical memory and ledger were untouched; no server restart, activation, or commit.
