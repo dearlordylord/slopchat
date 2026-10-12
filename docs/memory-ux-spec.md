@@ -478,3 +478,26 @@ Checks: TypeScript and Bun 54 tests/216 assertions passed; existing ERT 55/55 an
 ### Memory session feed follow-up skipped — 2026-10-11
 
 Igor explicitly declined further work on the session-feed increment. Mark its remaining work as skipped, not completed: keyboard navigation, source links, retry-success correlation, selection/scroll preservation, lifecycle acceptance, runtime activation and persistent error treatment. Do not activate or extend this increment under the previous approval. Existing on-disk changes are not removed by this decision. TODO 2 is skipped for now; the next discussion is item 3, Inline memory lens and source navigation, starting with scope and UX agreement rather than implementation.
+
+### 2026-10-12 — Source lens prototype (not activated)
+
+A read-only overlay reuses the existing Lisp zoom explorer. `/source ID [N]` opens an aligned power-of-two archive range; reply headings also offer original-message browsing. Enter expands, arrows select children, Left/Right page originals, and Escape returns through parents to chat. Browsing does not attach a reference or send agent input. The conversation remains mounted and the composer draft is retained. Reads have a five-second boundary timeout and are interrupted on exit/unmount; stale responses are ignored.
+
+Checks: TypeScript passed; Bun 55 tests / 219 assertions passed, including a local-only original read and draft preservation. TODO 3 remains open: summary-chain and pagination fixtures, missing references, cancellation/stale completion, scroll/cursor preservation, keyboard entry from chat, and live acceptance are not yet verified. No TUI activation or server restart.
+
+### 2026-10-12: Source browsing in /map
+The primary read-only entry is /map (or Ctrl+O), without manually entering IDs. Select a summary, press Enter to browse children, then Enter on a leaf to read its original. Left/Right page originals; Escape returns through parents to chat. A keyboard integration test verifies the full path, exact Lisp zoom requests, draft preservation, and no send request. TypeScript and all 56 UI tests passed (223 assertions). Running TUI activation and broader TODO 3 acceptance remain pending.
+
+### 2026-10-12: Decisions on items 3–5
+
+Igor accepted TODO 3 after manually checking source browsing in /map. Accepted scope: read-only summary/children/original navigation, pagination and return to chat; reference attachment remains excluded. This user acceptance does not claim exhaustive coverage of every earlier corner-case checklist.
+
+Igor explicitly skipped TODO 4. Do not implement a temporal map or an additional /map mode under the previous proposal. Skipped is not completed.
+
+TODO 5 is under scope review, not approved for implementation. Prefer a comparison within the existing /map explorer rather than another screen: selected parent summary alongside its exact two child summaries and source ranges. The widget remains activity/jobs; /context remains prepared model calls and token observations. Lifecycle, retry and publication metadata must be shown only when authoritative data exists; otherwise unavailable. No semantic-loss percentage, automatic fidelity judgment, new event history or memory mutation is authorized.
+
+### 2026-10-12 — TODO 5 comparison prototype
+Approved in-place comparison in /map: select a summary and press C to compare its displayed parent text with two Lisp-returned children and exact message ranges. Child ranges must partition the parent; unexpected coverage is rejected. Esc closes comparison without leaving the map. Browsing remains read-only and preserves the draft. Lifecycle/publication metadata is unavailable; no semantic-loss score or fidelity judgment is inferred. TypeScript and Bun passed: 57 tests, 227 assertions; git diff --check passed. Not activated. TODO 5 remains open: missing/stale responses, cancellation, long/narrow rendering, repeated merges and authoritative metadata need further coverage and acceptance.
+
+### 2026-10-12 — TODO 5 manual acceptance and boundary checks
+Igor reports the comparison works in the running TUI and asks to continue. Record manual acceptance of the approved read-only comparison scope, not exhaustive completion of the original inspector checklist. Missing children and non-partitioning ranges are rejected without opening a comparison or changing the draft; regression tests passed. TypeScript and Bun: 58 tests / 235 assertions passed. Cancellation/stale completion and long/narrow rendering remain unverified; authoritative lifecycle metadata is not implemented. TODO 6 remains deferred until separate scope agreement.

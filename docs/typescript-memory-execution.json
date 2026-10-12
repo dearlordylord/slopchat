@@ -1,0 +1,343 @@
+{
+  "revisions": {
+    "pi": "2bdbd4df63c696fabc06ee9bc616245083069097",
+    "durable": "6b2285cf88ab803d859a0efb038610f2a003ff50",
+    "lisp": "7567c83f9b68a7d51c8971ade104a3d0a1f1ecde"
+  },
+  "modelCalls": 0,
+  "mergeOracle": {
+    "cases": 181,
+    "matches": {
+      "pi": 181,
+      "durable": 181,
+      "lisp": 181
+    },
+    "method": "independent exact-rational last-inclusive age with oldest tie"
+  },
+  "pi": {
+    "failedContext": {
+      "ready": false,
+      "render": "<chat>\n0+1|(not summarized yet: zoom it)\n</chat>",
+      "lastError": "synthetic failure"
+    },
+    "oversized": {
+      "calls": 1,
+      "storedBytes": 700
+    },
+    "longRecord": {
+      "records": 1,
+      "originalBytes": 40000
+    },
+    "views": {
+      "before": {
+        "main": [
+          {
+            "l": 5,
+            "i": 0
+          },
+          {
+            "l": 4,
+            "i": 2
+          },
+          {
+            "l": 4,
+            "i": 3
+          },
+          {
+            "l": 3,
+            "i": 8
+          },
+          {
+            "l": 3,
+            "i": 9
+          },
+          {
+            "l": 1,
+            "i": 40
+          },
+          {
+            "l": 1,
+            "i": 41
+          },
+          {
+            "l": 0,
+            "i": 84
+          },
+          {
+            "l": 0,
+            "i": 85
+          },
+          {
+            "l": 0,
+            "i": 86
+          },
+          {
+            "l": 0,
+            "i": 87
+          },
+          {
+            "l": 0,
+            "i": 88
+          },
+          {
+            "l": 0,
+            "i": 89
+          },
+          {
+            "l": 0,
+            "i": 90
+          },
+          {
+            "l": 0,
+            "i": 91
+          },
+          {
+            "l": 0,
+            "i": 92
+          },
+          {
+            "l": 0,
+            "i": 93
+          },
+          {
+            "l": 0,
+            "i": 94
+          },
+          {
+            "l": 0,
+            "i": 95
+          }
+        ],
+        "compaction": [
+          {
+            "l": 6,
+            "i": 0
+          },
+          {
+            "l": 5,
+            "i": 2
+          }
+        ],
+        "mainText": "<chat>\n0+32|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n32+16|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n48+16|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n64+8|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n72+8|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n80+2|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n82+2|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n84+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n85+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n86+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n87+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n88+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n89+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n90+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n91+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n92+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n93+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n94+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n95+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n</chat>",
+        "measured": 7600,
+        "wireBytes": 7730,
+        "calls": 190
+      },
+      "after": {
+        "main": [
+          {
+            "l": 5,
+            "i": 0
+          },
+          {
+            "l": 4,
+            "i": 2
+          },
+          {
+            "l": 4,
+            "i": 3
+          },
+          {
+            "l": 3,
+            "i": 8
+          },
+          {
+            "l": 3,
+            "i": 9
+          },
+          {
+            "l": 1,
+            "i": 40
+          },
+          {
+            "l": 1,
+            "i": 41
+          },
+          {
+            "l": 0,
+            "i": 84
+          },
+          {
+            "l": 0,
+            "i": 85
+          },
+          {
+            "l": 0,
+            "i": 86
+          },
+          {
+            "l": 0,
+            "i": 87
+          },
+          {
+            "l": 0,
+            "i": 88
+          },
+          {
+            "l": 0,
+            "i": 89
+          },
+          {
+            "l": 0,
+            "i": 90
+          },
+          {
+            "l": 0,
+            "i": 91
+          },
+          {
+            "l": 0,
+            "i": 92
+          },
+          {
+            "l": 0,
+            "i": 93
+          },
+          {
+            "l": 0,
+            "i": 94
+          },
+          {
+            "l": 0,
+            "i": 95
+          }
+        ],
+        "compaction": [
+          {
+            "l": 6,
+            "i": 0
+          },
+          {
+            "l": 5,
+            "i": 2
+          }
+        ],
+        "mainText": "<chat>\n0+32|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n32+16|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n48+16|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n64+8|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n72+8|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n80+2|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n82+2|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n84+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n85+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n86+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n87+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n88+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n89+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n90+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n91+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n92+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n93+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n94+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n95+1|ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss\n</chat>",
+        "calls": 190
+      },
+      "mainIdentical": true,
+      "compactionIdentical": true
+    },
+    "reopenSmall": {
+      "before": [
+        {
+          "l": 0,
+          "i": 0
+        },
+        {
+          "l": 0,
+          "i": 1
+        },
+        {
+          "l": 0,
+          "i": 2
+        }
+      ],
+      "after": [
+        {
+          "l": 0,
+          "i": 0
+        },
+        {
+          "l": 0,
+          "i": 1
+        },
+        {
+          "l": 0,
+          "i": 2
+        }
+      ],
+      "compactionIdentical": true,
+      "mainIdentical": true
+    },
+    "asyncReceipt": {
+      "receiptId": 0,
+      "persisted": 0,
+      "visibleRecords": 1
+    },
+    "mutableRead": {
+      "zoomReflectsMutation": true
+    }
+  },
+  "lisp": {
+    "failedContext": {
+      "state": "failed",
+      "hasText": false
+    },
+    "oversized": {
+      "calls": 5,
+      "bytes": 700
+    },
+    "longRecord": {
+      "records": 2,
+      "originalBytes": 40000
+    }
+  },
+  "limits": [
+    "Durable full lifecycle tested by upstream suite; cross-language custom operational probes cover pi and Lisp only.",
+    "Stub summaries test plumbing, not semantic fidelity, real cache hit rate or cost.",
+    "Oracle identity requested from user; this reference covers UNII merge rule only."
+  ],
+  "upstreamValidation": {
+    "pi": {
+      "typecheck": "passed",
+      "tests": 284,
+      "passed": 283,
+      "skipped": 1,
+      "failed": 0,
+      "durationSeconds": 116.515
+    },
+    "durable": {
+      "typecheck": "passed",
+      "build": "passed",
+      "sdkExample": "passed with simulated provider",
+      "tests": 109,
+      "passed": 108,
+      "cancelled": 1,
+      "failed": 0,
+      "exitCode": 1,
+      "durationSeconds": 260.776,
+      "cancelledTest": "continuous native cache rehearsal uses real Pi lifecycle, batches, resumes and retrieves every original",
+      "timeoutSeconds": 180,
+      "cleanup": "Only the still-live cache test worker was terminated after its own test timeout; other suite results retained."
+    },
+    "lisp": {
+      "tests": 22,
+      "passed": 22,
+      "failed": 0
+    }
+  },
+  "environment": {
+    "node": "24.20.0",
+    "bun": "1.3.14",
+    "platform": "Linux arm64",
+    "installation": "npm ci --ignore-scripts, pinned lockfiles",
+    "data": "temporary synthetic directories; no main chat access or changes"
+  },
+  "logs": {
+    "pi-tests.log": {
+      "sha256": "38ea1b64ce0141361488cf28ef7c813e3892f434913d7a39856bb3abc48ee675",
+      "localPath": "/tmp/slopchat-ts-memory-review/pi-tests.log"
+    },
+    "durable-tests.log": {
+      "sha256": "55561e7e2d91228b1a18e44aeb8f17f719980431bb7e4151de2da8684cccaafc",
+      "localPath": "/tmp/slopchat-ts-memory-review/durable-tests.log"
+    },
+    "pi-typecheck.log": {
+      "sha256": "3124645b1311c811b5f9a2c082dec9ed0f9739aae97ba47192e6b64e41307b60",
+      "localPath": "/tmp/slopchat-ts-memory-review/pi-typecheck.log"
+    },
+    "durable-typecheck.log": {
+      "sha256": "0c9465c98b7002697d111ce130dc72aef921b09f6f6bf94f8f629d7e9ded5014",
+      "localPath": "/tmp/slopchat-ts-memory-review/durable-typecheck.log"
+    },
+    "lisp-tests.log": {
+      "sha256": "4b19990e3e3364c60bc65c29973cb0ac92c613a3671865ee384c85882974c51a",
+      "localPath": "/tmp/slopchat-ts-memory-review/lisp-tests.log"
+    },
+    "durable-sdk-example.log": {
+      "sha256": "d565146254b4dc4168eac95b81f338b6caf71c58ccded385a0df6c1f5f613880",
+      "localPath": "/tmp/slopchat-ts-memory-review/durable-sdk-example.log"
+    }
+  }
+}
